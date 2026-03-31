@@ -236,10 +236,10 @@ Confirm generation? (yes / modify / cancel)
 ### Example 1: Chinese Mentor
 
 ```
-/distill-mentor 刘知远 --affiliation "清华大学"
+/distill-mentor Geoffrey Hinton --affiliation "University of Toronto"
 ```
 
-**Output**: Generates `刘知远.json` and `刘知远/SKILL.md` with:
+**Output**: Generates `Geoffrey_Hinton.json` and `geoffrey-hinton/SKILL.md` with:
 - Knowledge graphs, representation learning research areas
 - Applied research style
 - Chinese communication patterns

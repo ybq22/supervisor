@@ -268,7 +268,7 @@ async function main() {
     console.log('');
     console.log('Examples:');
     console.log('  node news-search.mjs "Geoffrey Hinton"');
-    console.log('  node news-search.mjs "刘知远" --affiliation "清华大学"');
+    console.log('  node news-search.mjs "Geoffrey Hinton" --affiliation "University of Toronto"');
     process.exit(1);
   }
 

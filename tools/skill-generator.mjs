@@ -450,7 +450,7 @@ async function main() {
     console.log('Usage: node skill-generator.mjs "<name>" [--affiliation "<institution>"] [--deep-analyze]');
     console.log('');
     console.log('Examples:');
-    console.log('  node skill-generator.mjs "刘知远" --affiliation "清华大学"');
+    console.log('  node skill-generator.mjs "Geoffrey Hinton" --affiliation "University of Toronto"');
     console.log('  node skill-generator.mjs "Geoffrey Hinton" --deep-analyze');
     process.exit(1);
   }

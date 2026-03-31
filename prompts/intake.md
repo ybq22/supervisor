@@ -15,7 +15,7 @@
 ```
 导师姓名是什么？（中文或英文名都可以）
 
-例：刘知远
+例：Geoffrey Hinton
 例：Geoffrey Hinton
 ```
 
