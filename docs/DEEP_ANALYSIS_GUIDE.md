@@ -188,7 +188,7 @@ node tools/deep-analyzer.mjs "<name>" --affiliation "<institution>"
 
 # Examples
 node tools/deep-analyzer.mjs "Geoffrey Hinton"
-node tools/deep-analyzer.mjs "刘知远" --affiliation "清华大学"
+node tools/deep-analyzer.mjs "Geoffrey Hinton" --affiliation "University of Toronto"
 ```
 
 ### Search for Public Information / 搜索公开信息

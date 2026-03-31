@@ -33,7 +33,7 @@
 node distill-mentor-cli.mjs "Geoffrey Hinton" --deep-analyze
 
 # 指定机构 + 深度分析
-node distill-mentor-cli.mjs "刘奕群" --affiliation "清华大学" --deep-analyze
+node distill-mentor-cli.mjs "Geoffrey Hinton" --affiliation "University of Toronto" --deep-analyze
 
 # 完整示例
 node distill-mentor-cli.mjs "Geoffrey Hinton" --affiliation "University of Montreal" --deep-analyze

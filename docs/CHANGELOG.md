@@ -51,22 +51,22 @@
 #### 使用示例
 ```bash
 # 全面收集（默认）
-/distill-mentor "Yoshua Bengio"
+/distill-mentor "Geoffrey Hinton"
 
 # 快速模式
-/distill-mentor "Yoshua Bengio" --no-browser
+/distill-mentor "Geoffrey Hinton" --no-browser
 ```
 
 ### 📊 测试结果
 
-测试 "Yoshua Bengio (University of Montreal)"：
+测试 "Geoffrey Hinton (University of Toronto)"：
 - ✅ 成功收集 23 个唯一结果
 - ✅ 数据质量评分：0.8/1.0（优秀）
 - ✅ 包含 4 种数据源类型
 
 **收集到的信息类型**：
-- 个人主页 (yoshuabengio.org)
-- Google Scholar (164,000+ 引用)
+- 个人主页 (www.cs.toronto.edu/~hinton)
+- Google Scholar (170,000+ 引用)
 - TED talks 和 YouTube 演讲
 - Wikipedia 完整传记
 - 学术机构页面
