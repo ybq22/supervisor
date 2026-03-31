@@ -229,10 +229,108 @@ async function searchGoogle(name, affiliation) {
 }
 ```
 
+### 浏览器搜索 (Puppeteer)
+
+```javascript
+import puppeteer from 'puppeteer';
+
+/**
+ * 使用 Puppeteer 进行 Google 搜索
+ * @param {string} query - 搜索查询
+ * @param {number} maxResults - 最大结果数
+ * @returns {Promise<Array>} 搜索结果数组
+ */
+async function searchGoogleWithBrowser(query, maxResults = 10) {
+  let browser = null;
+
+  try {
+    console.log(`🌐 使用浏览器搜索: ${query}`);
+
+    // 启动浏览器（使用轻量级配置）
+    browser = await puppeteer.launch({
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu'
+      ]
+    });
+
+    const page = await browser.newPage();
+
+    // 设置用户代理，模拟真实浏览器
+    await page.setUserAgent(
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    );
+
+    // 访问 Google
+    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}&num=${maxResults}`;
+    await page.goto(searchUrl, {
+      waitUntil: 'networkidle2',
+      timeout: 30000
+    });
+
+    // 等待搜索结果加载
+    try {
+      await page.waitForSelector('div#search', { timeout: 10000 });
+    } catch (error) {
+      console.log('⚠️  搜索结果加载超时，尝试继续...');
+    }
+
+    // 检查是否遇到 consent 页面
+    const consentForm = await page.$('form[action*="consent"]');
+    if (consentForm) {
+      console.log('🔐 检测到 Google Consent 页面，尝试接受...');
+      try {
+        await page.click('button[type="submit"]');
+        await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 10000 });
+        await page.waitForSelector('div#search', { timeout: 10000 });
+      } catch (error) {
+        console.log('⚠️  无法跳过 consent 页面');
+      }
+    }
+
+    // 提取搜索结果
+    const results = await page.evaluate(() => {
+      const items = [];
+      const searchResults = document.querySelectorAll('div.g');
+
+      searchResults.forEach(item => {
+        const titleEl = item.querySelector('h3');
+        const linkEl = item.querySelector('a');
+        const snippetEl = item.querySelector('.VwiC3b, .st');
+
+        if (titleEl && linkEl) {
+          items.push({
+            title: titleEl.textContent.trim(),
+            url: linkEl.href,
+            snippet: snippetEl ? snippetEl.textContent.trim() : ''
+          });
+        }
+      });
+
+      return items;
+    });
+
+    console.log(`✓ 找到 ${results.length} 个结果`);
+    return results.slice(0, maxResults);
+
+  } catch (error) {
+    console.error(`❌ 浏览器搜索失败: ${error.message}`);
+    return [];
+  } finally {
+    if (browser) {
+      await browser.close();
+    }
+  }
+}
+```
+
 ### 信息收集协调器
 
 ```javascript
-async function collectMentorInfo(name, affiliation) {
+async function collectMentorInfo(name, affiliation, useBrowser = true) {
   console.log(`🔍 收集导师信息: ${name}`);
 
   const info = {
@@ -243,8 +341,8 @@ async function collectMentorInfo(name, affiliation) {
     sources: []
   };
 
-  // 1. 搜索 ArXiv
-  console.log("[1/3] 正在搜索 ArXiv...");
+  // 1. 搜索 ArXiv（快速且准确）
+  console.log("[1/5] 正在搜索 ArXiv 论文...");
   const arxivPapers = await searchArxiv(name);
   if (arxivPapers.length > 0) {
     info.papers = arxivPapers;
@@ -254,24 +352,88 @@ async function collectMentorInfo(name, affiliation) {
     console.log("✗ 未找到 ArXiv 论文");
   }
 
-  // 2. 搜索个人主页
-  console.log("[2/3] 正在搜索个人主页...");
-  const websites = await searchGoogle(name, affiliation);
-  if (websites.length > 0) {
-    info.websites = websites;
-    info.sources.push("google");
-    console.log(`✓ 找到 ${websites.length} 个相关网页`);
+  // 2. 浏览器搜索（全面收集）
+  if (useBrowser) {
+    console.log("\n[2/5] 浏览器搜索模式：全面收集信息...");
+
+    let allResults = [];
+
+    // 搜索 1：个人主页和学术信息
+    console.log("   🔍 搜索 1/4: 个人主页和学术信息...");
+    const basicQuery = affiliation
+      ? `${name} ${affiliation} professor computer science`
+      : `${name} professor university computer science`;
+    const basicResults = await searchGoogleWithBrowser(basicQuery, 15);
+    allResults = allResults.concat(basicResults);
+    console.log(`      ✓ 找到 ${basicResults.length} 个结果`);
+
+    // 搜索 2：论文和出版物
+    console.log("   🔍 搜索 2/4: 论文和出版物...");
+    const papersQuery = `${name} papers publications research articles`;
+    const papersResults = await searchGoogleWithBrowser(papersQuery, 10);
+    allResults = allResults.concat(papersResults);
+    console.log(`      ✓ 找到 ${papersResults.length} 个结果`);
+
+    // 搜索 3：演讲和访谈
+    console.log("   🔍 搜索 3/4: 演讲、访谈和观点...");
+    const talksQuery = `${name} talks interviews lectures presentation`;
+    const talksResults = await searchGoogleWithBrowser(talksQuery, 8);
+    allResults = allResults.concat(talksResults);
+    console.log(`      ✓ 找到 ${talksResults.length} 个结果`);
+
+    // 搜索 4：Wikipedia 和百科信息
+    console.log("   🔍 搜索 4/4: Wikipedia 和百科信息...");
+    const wikiQuery = `${name} Wikipedia biography`;
+    const wikiResults = await searchGoogleWithBrowser(wikiQuery, 5);
+    allResults = allResults.concat(wikiResults);
+    console.log(`      ✓ 找到 ${wikiResults.length} 个结果`);
+
+    // 去重（基于 URL）
+    const uniqueResults = [];
+    const seenUrls = new Set();
+    for (const result of allResults) {
+      if (!seenUrls.has(result.url)) {
+        seenUrls.add(result.url);
+        uniqueResults.push(result);
+      }
+    }
+
+    if (uniqueResults.length > 0) {
+      info.websites = uniqueResults;
+      info.sources.push("browser-search");
+      console.log(`\n   📊 浏览器搜索总计: ${uniqueResults.length} 个唯一结果`);
+    } else {
+      console.log("\n   ⚠️  浏览器搜索无结果，回退到 DuckDuckGo...");
+      const fallbackResults = await searchGoogle(name, affiliation);
+      if (fallbackResults.length > 0) {
+        info.websites = fallbackResults;
+        info.sources.push("duckduckgo");
+        console.log(`   ✓ 找到 ${fallbackResults.length} 个结果`);
+      }
+    }
   } else {
-    console.log("✗ 未找到个人主页");
+    // 快速模式：仅使用 DuckDuckGo
+    console.log("[2/5] 快速模式：DuckDuckGo 搜索...");
+    const websites = await searchGoogle(name, affiliation);
+    if (websites.length > 0) {
+      info.websites = websites;
+      info.sources.push("duckduckgo");
+      console.log(`✓ 找到 ${websites.length} 个相关网页`);
+    } else {
+      console.log("✗ 未找到个人主页");
+    }
   }
 
   // 3. 数据质量检查
-  console.log("[3/3] 验证数据质量...");
+  console.log("\n[3/5] 验证数据质量...");
   const quality = assessDataQuality(info);
   console.log(`数据质量评分: ${quality.score}/1.0`);
+  console.log(`数据来源: ${info.sources.join(", ")}`);
 
   if (quality.score < 0.3) {
     console.warn("⚠️  数据不足，建议提供补充材料");
+  } else if (quality.score >= 0.8) {
+    console.log("✅ 数据质量优秀！");
   }
 
   return { info, quality };
@@ -285,18 +447,31 @@ function assessDataQuality(info) {
   let score = 0;
   const missing = [];
 
-  if (info.papers.length >= 3) score += 0.5;
+  // 论文数量评分（最高 0.4 分）
+  if (info.papers.length >= 5) score += 0.4;
+  else if (info.papers.length >= 3) score += 0.3;
+  else if (info.papers.length >= 1) score += 0.2;
   else missing.push("papers");
 
-  if (info.websites.length > 0) score += 0.3;
+  // 网页数量评分（最高 0.4 分）
+  // 浏览器搜索通常能找到 20+ 个结果
+  if (info.websites.length >= 20) score += 0.4;
+  else if (info.websites.length >= 10) score += 0.3;
+  else if (info.websites.length >= 5) score += 0.2;
+  else if (info.websites.length > 0) score += 0.1;
   else missing.push("websites");
 
-  if (info.papers.length > 0) score += 0.2;
+  // 数据源多样性（最高 0.2 分）
+  const sourceCount = info.sources.length;
+  if (sourceCount >= 3) score += 0.2;
+  else if (sourceCount >= 2) score += 0.1;
 
   return {
     score: Math.min(score, 1.0),
     missing,
-    data_sources: info.sources
+    data_sources: info.sources,
+    papers_count: info.papers.length,
+    websites_count: info.websites.length
   };
 }
 ```
@@ -496,15 +671,23 @@ async function main(args) {
   // 解析参数
   const name = args[0];
   const affiliation = args['--affiliation'] || null;
+  const useBrowser = args['--no-browser'] ? false : true;  // 默认使用浏览器
 
   // 输入验证
   if (!name) {
     console.log("❌ 错误: 请提供导师姓名");
     console.log("\n使用方法:");
-    console.log("  /distill-mentor <导师姓名> [--affiliation \"机构名称\"]");
+    console.log("  /distill-mentor <导师姓名> [--affiliation \"机构名称\"] [--no-browser]");
+    console.log("\n参数说明:");
+    console.log("  --affiliation: 导师所属机构（可选）");
+    console.log("  --no-browser: 禁用浏览器搜索，使用快速模式（仅 ArXiv + DuckDuckGo API）");
+    console.log("\n默认行为:");
+    console.log("  - 使用浏览器搜索，全面收集导师信息（推荐）");
+    console.log("  - 收集来源：个人主页、Google Scholar、论文、演讲、访谈等");
     console.log("\n示例:");
     console.log("  /distill-mentor 张三 --affiliation \"清华大学\"");
     console.log("  /distill-mentor John Smith");
+    console.log("  /distill-mentor Yoshua Bengio --no-browser  # 快速模式");
     return;
   }
 
@@ -514,12 +697,17 @@ async function main(args) {
   }
 
   console.log(`🎓 开始蒸馏导师: ${name}${affiliation ? ` (${affiliation})` : ''}`);
+  if (useBrowser) {
+    console.log(`🌐 使用浏览器搜索模式（全面收集信息，推荐）`);
+  } else {
+    console.log(`⚡ 使用快速模式（仅 ArXiv + DuckDuckGo API）`);
+  }
   console.log(`📋 工作流程:\n`);
 
   try {
     // 1. 收集信息
     console.log(`📚 [1/5] 收集导师信息...`);
-    const { info, quality } = await collectMentorInfo(name, affiliation);
+    const { info, quality } = await collectMentorInfo(name, affiliation, useBrowser);
 
     // 数据质量检查和用户确认
     if (quality.score < 0.3) {

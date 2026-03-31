@@ -1,0 +1,20 @@
+{
+  "name": "distill-mentor",
+  "version": "1.0.0",
+  "description": "学术导师数字分身蒸馏系统",
+  "type": "module",
+  "scripts": {
+    "test": "node test-functions.js"
+  },
+  "dependencies": {
+    "puppeteer": "^22.0.0"
+  },
+  "keywords": [
+    "arxiv",
+    "mentor",
+    "ai",
+    "scraping"
+  ],
+  "author": "Mentor Supervisor System",
+  "license": "MIT"
+}
