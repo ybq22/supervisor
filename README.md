@@ -9,6 +9,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js->=18.0-green.svg)](https://nodejs.org)
 [![Claude Code](https://img.shields.io/badge/Claude-Code-compatible-orange.svg)](https://claude.com/claude-code)
+[![AgentSkills](https://img.shields.io/badge/AgentSkills-compatible-brightgreen)](https://agentskills.io)
 
 ---
 
@@ -130,6 +131,27 @@ node --version  # 应显示 v18.0.0 或更高
 
 ---
 
+## 📁 项目结构
+
+```
+distill-mentor/
+├── SKILL.md                   # AgentSkills 入口文件
+├── prompts/                   # Prompt 模板
+│   ├── intake.md             # 信息收集流程
+│   ├── analyzer.md           # 档案分析提示
+│   ├── style-analyzer.md     # 风格分析提示
+│   └── builder.md            # Skill 生成提示
+├── tools/                     # 实现工具
+│   ├── arxiv-search.mjs      # ArXiv API 搜索
+│   ├── puppeteer-search.mjs  # 浏览器搜索
+│   ├── paper-analysis.mjs    # 深度论文分析
+│   └── skill-generator.mjs   # 主生成器
+├── mentors/                   # 生成的档案（gitignored）
+├── docs/                      # 文档
+├── examples/                  # 使用示例
+└── tests/                     # 测试文件
+```
+
 ## 🏗️ 工作原理
 
 ```mermaid
@@ -183,10 +205,12 @@ graph LR
 
 ## 📖 文档
 
+- 📖 [快速开始](QUICKSTART.md) - 5分钟上手指南
 - 📖 [使用指南](docs/USAGE.md) - 详细使用说明和示例
-- 🏗️ [架构设计](docs/superpowers/specs/2026-03-31-mentor-supervisor-design.md) - 系统设计文档
-- ✅ [测试报告](TEST_REPORT.md) - 测试覆盖和质量保证
-- 🚀 [实施记录](TEST_IMPLEMENTATION_REPORT.md) - 开发历程
+- 📊 [论文深度分析指南](docs/PAPER_ANALYSIS_GUIDE.md) - 深度分析功能说明
+- 🌐 [Puppeteer 配置指南](docs/PUPPETEER_GUIDE.md) - 浏览器搜索配置
+- ✅ [测试报告](docs/TEST_REPORT.md) - 测试覆盖和质量保证
+- 🚀 [实施记录](docs/TEST_IMPLEMENTATION_REPORT.md) - 开发历程
 
 ---
 

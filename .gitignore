@@ -21,3 +21,8 @@ test-*.js
 
 # Analysis reports (generated files)
 reports/
+
+# Generated mentor skills and profiles
+mentors/
+.claude/mentors/
+.claude/skills/
