@@ -100,7 +100,7 @@ node test-comprehensive-search.js "Geoffrey Hinton" "University of Toronto"
 #### 结果分类：
 
 **📁 个人主页 (6)**
-- yoshuabengio.org（官方网站）
+- cs.toronto.edu/~hinton（官方网站）
 - ResearchGate 个人资料
 - Academia.edu 个人页面
 - Biography Central

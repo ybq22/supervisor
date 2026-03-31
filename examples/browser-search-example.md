@@ -59,14 +59,14 @@
 
 ```
 💾 [4/5] 保存档案文件...
-✓ 档案已保存: /Users/xxx/.claude/mentors/Yoshua_Bengio.json
+✓ 档案已保存: /Users/xxx/.claude/mentors/Geoffrey_Hinton.json
 ```
 
 ### 5️⃣ 生成 Skill
 
 ```
 🤖 [5/5] 生成对话 Skill...
-✓ Mentor skill 已生成: /Users/xxx/.claude/skills/yoshua-bengio/SKILL.md
+✓ Mentor skill 已生成: /Users/xxx/.claude/skills/geoffrey-hinton/SKILL.md
 ```
 
 ## 收集到的信息
@@ -80,21 +80,21 @@
 ### 📁 信息分类
 
 **个人主页 (6)**
-- yoshuabengio.org
-- ResearchGate
-- Academia.edu
+- cs.toronto.edu/~hinton
+- Google Scholar
+- Wikipedia
 - 等等
 
 **学术机构 (4)**
-- Mila - Quebec AI Institute
-- Université de Montréal
-- CIFAR
+- University of Toronto
+- Vector Institute
+- Google (Alphabet)
 - 等等
 
 **论文/研究 (8)**
-- Google Scholar (164,000+ 引用)
+- Google Scholar (170,000+ 引用)
 - ArXiv 最新论文
-- DBLP 出版物
+- NeurIPS/ICML 论文
 - 等等
 
 **演讲/访谈 (7)**
@@ -117,7 +117,7 @@
 生成后，可以直接对话：
 
 ```bash
-/yoshua-bengio 你觉得深度学习的未来发展方向是什么？
+/geoffrey-hinton 你觉得深度学习的未来发展方向是什么？
 ```
 
 数字导师会基于收集到的真实信息，以 Geoffrey Hinton 的风格回答问题。
