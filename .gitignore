@@ -15,3 +15,9 @@ Thumbs.db
 
 # Test outputs
 *.log
+
+# Test files (intermediate development files)
+test-*.js
+
+# Analysis reports (generated files)
+reports/
