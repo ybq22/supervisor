@@ -50,5 +50,44 @@ parameters:
 - **档案文件**: `~/.claude/mentors/{name}.json`
 - **对话 Skill**: `~/.claude/skills/mentor-{name}.md`
 
+## 核心函数
+
+### ArXiv 搜索
+
+```javascript
+async function searchArxiv(authorName, maxResults = 10) {
+  const searchQuery = `au:${authorName.replace(/\s+/g, '+')}`;
+  const url = `http://export.arxiv.org/api/query?search_query=${searchQuery}&start=0&max_results=${maxResults}`;
+
+  try {
+    const response = await fetch(url);
+    const text = await response.text();
+
+    // 解析 XML 响应
+    const entries = text.match(/<entry>[\s\S]*?<\/entry>/g) || [];
+
+    return entries.map(entry => {
+      const title = entry.match(/<title>(.*?)<\/title>/)?.[1] || '';
+      const summary = entry.match(/<summary>(.*?)<\/summary>/)?.[1] || '';
+      const published = entry.match(/<published>(.*?)<\/published>/)?.[1] || '';
+      const arxivId = entry.match(/<id>(.*?)<\/id>/)?.[1]?.split('/').pop() || '';
+      const authors = entry.match(/<name>(.*?)<\/name>/g)?.map(a => a.replace(/<name>|<\/name>/g, '')) || [];
+
+      return {
+        title: title.trim(),
+        summary: summary.trim(),
+        published: published,
+        arxiv_id: arxivId,
+        authors: authors,
+        year: published ? new Date(published).getFullYear() : null
+      };
+    });
+  } catch (error) {
+    console.error(`ArXiv search failed: ${error.message}`);
+    return [];
+  }
+}
+```
+
 ---
 
