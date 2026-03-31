@@ -194,5 +194,99 @@ function assessDataQuality(info) {
 }
 ```
 
----
+### 风格分析器
 
+```javascript
+async function analyzeStyle(info) {
+  console.log("🧠 分析研究风格...");
+
+  // 准备分析上下文
+  const context = {
+    name: info.name,
+    affiliation: info.affiliation,
+    paper_count: info.papers.length,
+    paper_summaries: info.papers.slice(0, 5).map(p =>
+      `Title: ${p.title}\nSummary: ${p.summary.substring(0, 500)}...`
+    ).join('\n\n'),
+    websites: info.websites.map(w => w.title).join(', ')
+  };
+
+  // 使用 Claude API 分析风格
+  const analysisPrompt = `你是一位学术风格分析专家。基于以下信息，分析这位导师的研究风格。
+
+## 导师信息
+- 姓名: ${context.name}
+- 机构: ${context.affiliation || '未知'}
+
+## 论文（${context.paper_count}篇）
+${context.paper_summaries}
+
+## 网页
+${context.websites}
+
+请分析并返回 JSON 格式：
+{
+  "research_style": {
+    "type": "理论型/实验型/系统型/混合型",
+    "description": "简短描述",
+    "keywords": ["关键词1", "关键词2"]
+  },
+  "communication_style": {
+    "tone": "严厉/温和/幽默/专业",
+    "language": "中英混合/全英文/全中文"
+  },
+  "academic_values": ["价值观1", "价值观2"],
+  "expertise_areas": ["领域1", "领域2"]
+}`;
+
+  try {
+    // 调用 Claude API
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
+        messages: [{
+          role: 'user',
+          content: analysisPrompt
+        }]
+      })
+    });
+
+    const data = await response.json();
+    const content = data.content[0].text;
+
+    // 提取 JSON
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
+    }
+  } catch (error) {
+    console.error(`Style analysis failed: ${error.message}`);
+  }
+
+  // 降级：返回默认风格
+  return {
+    research_style: {
+      type: "混合型",
+      description: "基于公开研究的综合风格",
+      keywords: ["学术", "研究"]
+    },
+    communication_style: {
+      tone: "专业",
+      language: "英文"
+    },
+    academic_values: ["学术严谨", "创新思维"],
+    expertise_areas: info.papers.slice(0, 3).map(p =>
+      p.title.split(/\s+/).slice(0, 3).join(' ')
+    )
+  };
+}
+```
+
+---
