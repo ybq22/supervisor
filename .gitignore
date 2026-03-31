@@ -1,0 +1,17 @@
+# Generated mentor profiles and skills
+.claude/mentors/
+.claude/skills/
+
+# Temporary files
+/tmp/
+*.tmp
+
+# Node modules
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test outputs
+*.log
