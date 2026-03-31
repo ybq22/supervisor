@@ -32,19 +32,19 @@ npm install
 node test-puppeteer.js
 
 # 测试全面信息收集（推荐）
-node test-comprehensive-search.js "Yoshua Bengio"
-node test-comprehensive-search.js "Yoshua Bengio" "University of Montreal"
+node test-comprehensive-search.js "Geoffrey Hinton"
+node test-comprehensive-search.js "Geoffrey Hinton" "University of Toronto"
 ```
 
 ### 在 distill-mentor 中使用
 
 ```bash
 # 默认模式（浏览器搜索，全面收集）
-/distill-mentor "Yoshua Bengio"
-/distill-mentor "Yoshua Bengio" --affiliation "University of Montreal"
+/distill-mentor "Geoffrey Hinton"
+/distill-mentor "Geoffrey Hinton" --affiliation "University of Toronto"
 
 # 快速模式（仅 ArXiv + DuckDuckGo API）
-/distill-mentor "Yoshua Bengio" --no-browser
+/distill-mentor "Geoffrey Hinton" --no-browser
 ```
 
 ## 技术细节
@@ -93,7 +93,7 @@ node test-comprehensive-search.js "Yoshua Bengio" "University of Montreal"
 
 ### 全面信息收集测试
 
-测试搜索 "Yoshua Bengio (University of Montreal)"：
+测试搜索 "Geoffrey Hinton (University of Toronto)"：
 
 ✅ **成功收集 23 个唯一结果**，数据质量评分 **0.8/1.0**
 

@@ -687,7 +687,7 @@ async function main(args) {
     console.log("\n示例:");
     console.log("  /distill-mentor 张三 --affiliation \"清华大学\"");
     console.log("  /distill-mentor John Smith");
-    console.log("  /distill-mentor Yoshua Bengio --no-browser  # 快速模式");
+    console.log("  /distill-mentor Geoffrey Hinton --no-browser  # 快速模式");
     return;
   }
 

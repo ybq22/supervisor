@@ -517,12 +517,15 @@ async function collectMentorInfo(name, affiliation, useBrowser = true) {
 // 主工作流程
 // ============================================================================
 
-async function main(name, affiliation, useBrowser) {
+async function main(name, affiliation, useBrowser, deepAnalyze) {
   console.log(`🎓 开始蒸馏导师: ${name}${affiliation ? ` (${affiliation})` : ''}`);
   if (useBrowser) {
     console.log(`🌐 使用浏览器搜索模式（全面收集信息，推荐）`);
   } else {
     console.log(`⚡ 使用快速模式（仅 ArXiv + DuckDuckGo API）`);
+  }
+  if (deepAnalyze) {
+    console.log(`🔬 启用论文深度分析模式`);
   }
   console.log(`📋 工作流程:\n`);
 
@@ -555,6 +558,43 @@ async function main(name, affiliation, useBrowser) {
           p.title.split(/\s+/).slice(0, 3).join(' ')
         )
       };
+    }
+
+    // 2.5 深度论文分析（可选）
+    let paperDeepAnalysis = null;
+    if (deepAnalyze) {
+      console.log(`\n🔬 [2.5/5] 深度分析论文（近3年 + Top引用）...`);
+      try {
+        const paperAnalysisModule = await import('./paper-analysis.js');
+        paperDeepAnalysis = await paperAnalysisModule.analyzeAuthorPapers(
+          name,
+          info.papers,
+          {
+            recentYears: 3,
+            topCited: 10,
+            useSemanticScholar: true
+          }
+        );
+
+        if (paperDeepAnalysis) {
+          // 保存分析报告
+          await paperAnalysisModule.saveAnalysisReport(name, paperDeepAnalysis);
+
+          // 更新档案，添加深度分析结果
+          profile.meta.paper_analysis = {
+            performed: true,
+            total_papers_analyzed: paperDeepAnalysis.analyzed_papers,
+            recent_papers_count: paperDeepAnalysis.recent_papers,
+            top_cited_count: paperDeepAnalysis.top_cited_papers,
+            analysis_date: new Date().toISOString()
+          };
+
+          console.log(`✓ 论文深度分析完成\n`);
+        }
+      } catch (analysisError) {
+        console.error(`✗ 论文深度分析失败: ${analysisError.message}`);
+        console.log(`  继续使用基础档案...\n`);
+      }
     }
 
     // 3. 生成档案
@@ -616,11 +656,16 @@ const args = process.argv.slice(2);
 if (args.length === 0) {
   console.log("❌ 错误: 请提供导师姓名");
   console.log("\n使用方法:");
-  console.log("  node distill-mentor-cli.mjs <导师姓名> [--affiliation \"机构名称\"] [--no-browser]");
+  console.log("  node distill-mentor-cli.mjs <导师姓名> [--affiliation \"机构名称\"] [--no-browser] [--deep-analyze]");
+  console.log("\n选项:");
+  console.log("  --affiliation \"机构\"   指定导师所属机构（帮助精准搜索）");
+  console.log("  --no-browser           禁用浏览器搜索，仅使用快速模式");
+  console.log("  --deep-analyze         启用论文深度分析（近3年 + Top引用）");
   console.log("\n示例:");
   console.log("  node distill-mentor-cli.mjs \"Yoshua Bengio\"");
   console.log("  node distill-mentor-cli.mjs \"Yoshua Bengio\" --affiliation \"University of Montreal\"");
   console.log("  node distill-mentor-cli.mjs \"John Smith\" --no-browser");
+  console.log("  node distill-mentor-cli.mjs \"Yoshua Bengio\" --deep-analyze");
   process.exit(1);
 }
 
@@ -631,8 +676,9 @@ const affiliation = affiliationIndex !== -1 && args[affiliationIndex + 1]
   : null;
 
 const useBrowser = !args.includes('--no-browser');
+const deepAnalyze = args.includes('--deep-analyze');
 
-main(name, affiliation, useBrowser).catch(error => {
+main(name, affiliation, useBrowser, deepAnalyze).catch(error => {
   console.error('Fatal error:', error);
   process.exit(1);
 });

@@ -1,9 +1,9 @@
 # 浏览器搜索示例
 
-## 示例：生成 Yoshua Bengio 的数字分身
+## 示例：生成 Geoffrey Hinton 的数字分身
 
 ```bash
-/distill-mentor "Yoshua Bengio" --affiliation "University of Montreal"
+/distill-mentor "Geoffrey Hinton" --affiliation "University of Toronto"
 ```
 
 ## 执行流程
@@ -11,7 +11,7 @@
 ### 1️⃣ 收集导师信息
 
 ```
-🔍 收集导师信息: Yoshua Bengio
+🔍 收集导师信息: Geoffrey Hinton
 🌐 使用浏览器搜索模式（全面收集信息，推荐）
 📋 工作流程:
 
@@ -120,14 +120,14 @@
 /yoshua-bengio 你觉得深度学习的未来发展方向是什么？
 ```
 
-数字导师会基于收集到的真实信息，以 Yoshua Bengio 的风格回答问题。
+数字导师会基于收集到的真实信息，以 Geoffrey Hinton 的风格回答问题。
 
 ## 快速模式对比
 
 如果使用快速模式：
 
 ```bash
-/distill-mentor "Yoshua Bengio" --no-browser
+/distill-mentor "Geoffrey Hinton" --no-browser
 ```
 
 **结果对比**：

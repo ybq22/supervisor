@@ -38,10 +38,10 @@
 
 ```bash
 # 在 Claude Code 中运行
-/distill-mentor Yoshua Bengio
+/distill-mentor Geoffrey Hinton --affiliation "University of Toronto"
 
 # 然后就可以随时提问了！
-/yoshua-bengio 你觉得强化学习未来会怎么发展？
+/geoffrey-hinton 你觉得深度学习的未来发展方向是什么？
 ```
 
 **✨ 就像导师真的在身边一样！**
@@ -107,7 +107,7 @@ node --version  # 应显示 v18.0.0 或更高
 ### 📝 论文审阅
 
 ```bash
-/yoshua-bengio 我这篇关于深度学习论文的创新点够不够突出？
+/geoffrey-hinton 我这篇关于深度学习论文的创新点够不够突出？
 ```
 
 **数字导师会：**
@@ -119,7 +119,7 @@ node --version  # 应显示 v18.0.0 或更高
 ### 🔬 研究方向咨询
 
 ```bash
-/mengdi-wang 强化学习在优化领域有哪些前沿方向？
+/geoffrey-hinton 神经网络的架构设计有哪些前沿方向？
 ```
 
 **数字导师会：**
@@ -176,8 +176,7 @@ graph LR
 
 | 导师 | 机构 | 研究领域 |
 |------|------|----------|
-| Yoshua Bengio | Université de Montréal | Deep Learning, Neural Networks |
-| Mengdi Wang | Princeton University | Optimization, Reinforcement Learning |
+| Geoffrey Hinton | University of Toronto | Deep Learning, Neural Networks, Cognitive Science |
 | *[你的导师]* | *[你的机构]* | *[你的领域]* |
 
 ---
