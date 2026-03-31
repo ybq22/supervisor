@@ -89,5 +89,110 @@ async function searchArxiv(authorName, maxResults = 10) {
 }
 ```
 
+### Google 搜索 (DuckDuckGo)
+
+```javascript
+async function searchGoogle(name, affiliation) {
+  const query = affiliation
+    ? `${name} ${affiliation} computer science`
+    : `${name} professor university`;
+
+  const url = `https://duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
+
+  try {
+    const response = await fetch(url);
+    const html = await response.text();
+
+    // 提取搜索结果（简化版）
+    const results = html.match(/<a[^>]*class="result__url"[^>]*>(.*?)<\/a>/g) || [];
+
+    return results.slice(0, 5).map(result => {
+      const url = result.match(/href="([^"]*)"/)?.[1] || '';
+      const title = result.replace(/<[^>]*>/g, '').trim();
+
+      return {
+        url: url,
+        title: title
+      };
+    }).filter(r => r.url && !r.url.includes('duckduckgo'));
+  } catch (error) {
+    console.error(`Google search failed: ${error.message}`);
+    return [];
+  }
+}
+```
+
+### 信息收集协调器
+
+```javascript
+async function collectMentorInfo(name, affiliation) {
+  console.log(`🔍 收集导师信息: ${name}`);
+
+  const info = {
+    name: name,
+    affiliation: affiliation,
+    papers: [],
+    websites: [],
+    sources: []
+  };
+
+  // 1. 搜索 ArXiv
+  console.log("[1/3] 正在搜索 ArXiv...");
+  const arxivPapers = await searchArxiv(name);
+  if (arxivPapers.length > 0) {
+    info.papers = arxivPapers;
+    info.sources.push("arxiv");
+    console.log(`✓ 找到 ${arxivPapers.length} 篇论文`);
+  } else {
+    console.log("✗ 未找到 ArXiv 论文");
+  }
+
+  // 2. 搜索个人主页
+  console.log("[2/3] 正在搜索个人主页...");
+  const websites = await searchGoogle(name, affiliation);
+  if (websites.length > 0) {
+    info.websites = websites;
+    info.sources.push("google");
+    console.log(`✓ 找到 ${websites.length} 个相关网页`);
+  } else {
+    console.log("✗ 未找到个人主页");
+  }
+
+  // 3. 数据质量检查
+  console.log("[3/3] 验证数据质量...");
+  const quality = assessDataQuality(info);
+  console.log(`数据质量评分: ${quality.score}/1.0`);
+
+  if (quality.score < 0.3) {
+    console.warn("⚠️  数据不足，建议提供补充材料");
+  }
+
+  return { info, quality };
+}
+```
+
+### 数据质量评估
+
+```javascript
+function assessDataQuality(info) {
+  let score = 0;
+  const missing = [];
+
+  if (info.papers.length >= 3) score += 0.5;
+  else missing.push("papers");
+
+  if (info.websites.length > 0) score += 0.3;
+  else missing.push("websites");
+
+  if (info.papers.length > 0) score += 0.2;
+
+  return {
+    score: Math.min(score, 1.0),
+    missing,
+    data_sources: info.sources
+  };
+}
+```
+
 ---
 
