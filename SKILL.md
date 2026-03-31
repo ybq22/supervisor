@@ -2,7 +2,7 @@
 name: distill-mentor
 description: "Distill academic mentors into AI Skills. Auto-collect papers, analyze research style, and generate conversational mentor skills. | 蒸馏学术导师的数字分身，自动收集论文、分析研究风格，生成可对话的导师 skill。"
 argument-hint: "<mentor-name> [--affiliation <institution>]"
-version: "1.0.0"
+version: "1.1.0"
 user-invocable: true
 allowed-tools: Read, Write, Edit, Bash
 ---
@@ -24,6 +24,105 @@ Activate when the user says:
 - "帮我生成 <导师名> 的 skill"
 - "蒸馏 <导师名>"
 - "Create mentor skill for <name>"
+
+## 🆕 Deep Analysis Features (v1.1.0)
+
+### Enhanced Paper Analysis
+
+The system now performs **deep analysis** of mentor's papers to extract:
+
+**Research Interests & Preferences**:
+- Core research themes and evolution over time
+- Problem type preferences (theoretical vs practical)
+- Innovation style (groundbreaking vs incremental)
+- Emerging research directions
+
+**Research Methodology**:
+- Experimental design patterns
+- Dataset preferences and benchmarks used
+- Ablation study approaches
+- Evaluation metrics prioritized
+
+**Visualization & Presentation**:
+- Chart and figure preferences
+- Visual style (minimalist vs detailed)
+- Result presentation patterns
+- Typical visualization techniques
+
+**Writing Style**:
+- Title patterns and structure
+- Abstract organization
+- Technical depth in body text
+- Paragraph and transition patterns
+
+**Research Thinking**:
+- Innovation sources (theory/data/application-driven)
+- Problem-solving approaches
+- Typical research workflows
+- Reasoning patterns
+
+**Academic Values**:
+- Attitudes toward simplicity, practicality, rigor
+- Open-source and code-sharing stance
+- Community engagement level
+
+**Paper Organization**:
+- Typical paper structure
+- Section length preferences
+- Method presentation style (formulas/pseudocode/text)
+- Experiments section proportion
+
+### Public Information Analysis
+
+The system also analyzes **publicly available information**:
+
+**Personality Traits**:
+- Openness, conscientiousness, extraversion
+- Communication and decision-making style
+- Work-life balance patterns
+
+**Communication Style**:
+- Speaking style (from talks, interviews)
+- Writing style (from blogs, social media)
+- Humor, formality, interaction levels
+
+**Academic Philosophy**:
+- Research purpose and standards
+- Teaching philosophy and mentorship style
+- Views on field trends and future
+
+**Social & Interpersonal**:
+- Collaboration preferences
+- Student-mentor relationship style
+- Community service involvement
+
+**Values & Beliefs**:
+- Career priorities
+- Success definition
+- Social and ethical stances
+
+**Personal Interests**:
+- Hobbies outside academia
+- Work-life integration
+- Lifestyle preferences
+
+### How to Use Deep Analysis
+
+```bash
+# Run deep analysis
+node tools/deep-analyzer.mjs "<name>" --affiliation "<institution>"
+
+# Search for public information
+node tools/news-search.mjs "<name>" --affiliation "<institution>"
+
+# Results saved to:
+# reports/<name>_deep_analysis.json
+# reports/<name>_news_search.json
+```
+
+The analysis uses the prompts in:
+- `prompts/deep-paper-analyzer.md` - For paper analysis
+- `prompts/public-info-analyzer.md` - For public info analysis
 
 ## 工作流程 / Workflow
 
