@@ -312,6 +312,36 @@ distill-mentor/
 
 ---
 
+## 💬 加入社区
+
+欢迎加入我们的社区，与其他用户交流使用经验！
+
+### 🤝 Discord 社区
+
+加入我们的 Discord 服务器，与全球用户实时交流：
+
+[![Discord](https://img.shields.io/badge/Discord-Join%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/4KhRcn6Sf6)
+
+**加入讨论：** [https://discord.gg/4KhRcn6Sf6](https://discord.gg/4KhRcn6Sf6)
+
+### 🇨🇳 微信群
+
+扫描二维码加入微信群：
+
+<div align="center">
+
+<img src="assets/wechat-qr.jpg" alt="微信二维码" width="200"/>
+
+</div>
+
+**微信群用途：**
+- 💡 分享使用心得和最佳实践
+- 🐛 反馈问题和建议
+- 📚 获取项目更新通知
+- 🤝 结识志同道合的朋友
+
+---
+
 ## 🧪 开发
 
 ```bash

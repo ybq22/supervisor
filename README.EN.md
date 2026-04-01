@@ -310,6 +310,36 @@ Create your own digital twin to let students understand your research philosophy
 
 ---
 
+## 💬 Join the Community
+
+Welcome to join our community and connect with other users!
+
+### 🤝 Discord Community
+
+Join our Discord server for real-time discussions with users worldwide:
+
+[![Discord](https://img.shields.io/badge/Discord-Join%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/4KhRcn6Sf6)
+
+**Join the discussion:** [https://discord.gg/4KhRcn6Sf6](https://discord.gg/4KhRcn6Sf6)
+
+### 🇨🇳 WeChat Group
+
+Scan the QR code to join our WeChat group:
+
+<div align="center">
+
+<img src="assets/wechat-qr.jpg" alt="WeChat QR Code" width="200"/>
+
+</div>
+
+**WeChat group for:**
+- 💡 Sharing experiences and best practices
+- 🐛 Reporting issues and suggestions
+- 📚 Getting project updates
+- 🤝 Connecting with like-minded people
+
+---
+
 ## 🧪 Development
 
 ```bash
