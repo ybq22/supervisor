@@ -26,3 +26,4 @@ reports/
 mentors/
 .claude/mentors/
 .claude/skills/
+.env
