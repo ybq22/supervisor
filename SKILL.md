@@ -169,7 +169,7 @@ Use `${CLAUDE_SKILL_DIR}/prompts/style-analyzer.md` to determine:
 
 Use `${CLAUDE_SKILL_DIR}/prompts/builder.md` to generate:
 
-**1. Mentor Profile JSON** (`~/.claude/mentors/{name}.json`)
+**1. Mentor Profile JSON** (`~/.agents/mentors/{name}.json`)
 ```json
 {
   "meta": {
@@ -197,7 +197,7 @@ Use `${CLAUDE_SKILL_DIR}/prompts/builder.md` to generate:
 }
 ```
 
-**2. Mentor Skill** (`~/.claude/skills/{name}/SKILL.md`)
+**2. Mentor Skill** (`~/.agents/skills/{name}/SKILL.md`)
 
 ### Step 5: Preview and Confirm / 预览确认
 
@@ -221,15 +221,15 @@ Confirm generation? (yes / modify / cancel)
 | Search ArXiv papers | `Bash` → `node ${CLAUDE_SKILL_DIR}/tools/arxiv-search.mjs` |
 | Web search (personal pages) | `Bash` → `node ${CLAUDE_SKILL_DIR}/tools/puppeteer-search.mjs` |
 | Deep paper analysis | `Bash` → `node ${CLAUDE_SKILL_DIR}/tools/paper-analysis.mjs` |
-| Read existing profiles | `Read` tool on `~/.claude/mentors/{name}.json` |
+| Read existing profiles | `Read` tool on `~/.agents/mentors/{name}.json` |
 | Write profile JSON | `Write` tool |
 | Generate mentor skill | Use prompts in `${CLAUDE_SKILL_DIR}/prompts/` |
 
 ## 输出位置 / Output Locations
 
-**Profile JSON**: `~/.claude/mentors/{name}.json`
+**Profile JSON**: `~/.agents/mentors/{name}.json` (Symlinked to `~/.claude/mentors/`)
 
-**Mentor Skill**: `~/.claude/skills/{name}/SKILL.md`
+**Mentor Skill**: `~/.agents/skills/{name}/SKILL.md` (Symlinked to `~/.claude/skills/`)
 
 ## 示例 / Examples
 
@@ -271,11 +271,11 @@ User says "这不对" / "that's wrong":
 
 ## 管理命令 / Management Commands
 
-**List mentors**: `ls ~/.claude/mentors/`
+**List mentors**: `ls ~/.agents/mentors/`
 
-**Delete mentor**: `rm ~/.claude/mentors/{name}.json && rm -rf ~/.claude/skills/{name}/`
+**Delete mentor**: `rm ~/.agents/mentors/{name}.json && rm -rf ~/.agents/skills/{name}/`
 
-**View profile**: `cat ~/.claude/mentors/{name}.json | jq`
+**View profile**: `cat ~/.agents/mentors/{name}.json | jq`
 
 ## 配置选项 / Configuration
 

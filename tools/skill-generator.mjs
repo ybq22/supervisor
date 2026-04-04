@@ -256,15 +256,70 @@ async function analyzeResearchStyle(info, fields) {
 }
 
 /**
+ * Create a symlink gracefully (removes existing if needed)
+ */
+async function createSymlink(target, path) {
+  try {
+    try {
+      const stats = await fs.lstat(path);
+      if (stats) {
+        await fs.unlink(path); // remove existing link or file
+      }
+    } catch (e) {
+      // doesn't exist, which is fine
+    }
+    await fs.symlink(target, path);
+  } catch (error) {
+    console.error(`  ⚠️  Failed to create symlink at ${path}: ${error.message}`);
+  }
+}
+
+/**
+ * Update the skill-lock.json to register the local skill
+ */
+async function updateSkillLock(mentorSlug) {
+  const lockfilePath = path.join(process.env.HOME, '.agents', '.skill-lock.json');
+  let lockData = { version: 3, skills: {} };
+
+  try {
+    const data = await fs.readFile(lockfilePath, 'utf8');
+    lockData = JSON.parse(data);
+  } catch (e) {
+    // If it doesn't exist or is invalid, use default structure
+  }
+
+  if (!lockData.skills) lockData.skills = {};
+
+  const now = new Date().toISOString();
+  lockData.skills[mentorSlug] = {
+    source: "local",
+    sourceType: "local",
+    skillPath: "SKILL.md",
+    installedAt: lockData.skills[mentorSlug]?.installedAt || now,
+    updatedAt: now
+  };
+
+  try {
+    await fs.writeFile(lockfilePath, JSON.stringify(lockData, null, 2), 'utf8');
+  } catch (error) {
+    console.error(`  ⚠️  Failed to update .skill-lock.json: ${error.message}`);
+  }
+}
+
+/**
  * Generate mentor skill file
  */
 async function generateSkill(profile) {
-  const mentorsDir = path.join(process.env.HOME, '.claude', 'mentors');
-  const skillsDir = path.join(process.env.HOME, '.claude', 'skills');
+  const agentsMentorsDir = path.join(process.env.HOME, '.agents', 'mentors');
+  const agentsSkillsDir = path.join(process.env.HOME, '.agents', 'skills');
+  const claudeMentorsDir = path.join(process.env.HOME, '.claude', 'mentors');
+  const claudeSkillsDir = path.join(process.env.HOME, '.claude', 'skills');
 
   // Create directories
-  await fs.mkdir(mentorsDir, { recursive: true });
-  await fs.mkdir(skillsDir, { recursive: true });
+  await fs.mkdir(agentsMentorsDir, { recursive: true });
+  await fs.mkdir(agentsSkillsDir, { recursive: true });
+  await fs.mkdir(claudeMentorsDir, { recursive: true });
+  await fs.mkdir(claudeSkillsDir, { recursive: true });
 
   // Generate slug without spaces for files and skill name
   const mentorSlug = profile.meta.mentor_name
@@ -272,18 +327,31 @@ async function generateSkill(profile) {
     .replace(/\s+/g, '');                      // Remove spaces
   const mentorName = profile.meta.mentor_name.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_');
 
-  // Save profile JSON (uses readable name with underscores)
-  const profilePath = path.join(mentorsDir, `${mentorName}.json`);
+  // Save profile JSON to .agents
+  const profilePath = path.join(agentsMentorsDir, `${mentorName}.json`);
   await fs.writeFile(profilePath, JSON.stringify(profile, null, 2), 'utf8');
   console.log(`  ✓ Profile saved: ${profilePath}`);
 
-  // Generate and save SKILL.md (uses slug without spaces)
+  // Generate and save SKILL.md to .agents
   const skillContent = generateSkillContent(profile, mentorSlug);
-  const skillDir = path.join(skillsDir, mentorSlug);
+  const skillDir = path.join(agentsSkillsDir, mentorSlug);
   await fs.mkdir(skillDir, { recursive: true });
   const skillPath = path.join(skillDir, 'SKILL.md');
   await fs.writeFile(skillPath, skillContent, 'utf8');
   console.log(`  ✓ Skill saved: ${skillPath}`);
+
+  // Update .skill-lock.json
+  await updateSkillLock(mentorSlug);
+  console.log(`  ✓ Skill registered in ~/.agents/.skill-lock.json`);
+
+  // Create symlinks in .claude for compatibility
+  const claudeProfileSymlink = path.join(claudeMentorsDir, `${mentorName}.json`);
+  await createSymlink(profilePath, claudeProfileSymlink);
+
+  const claudeSkillSymlink = path.join(claudeSkillsDir, mentorSlug);
+  await createSymlink(skillDir, claudeSkillSymlink);
+
+  console.log(`  ✓ Symlinks created in ~/.claude for compatibility`);
 
   console.log(`\n  🚀 Usage: /${mentorSlug} <question>\n`);
 }
@@ -422,6 +490,70 @@ function extractCitations(websites) {
 }
 
 function printSummary(profile) {
+  const { profile: p, research: r, filePaths, mentorSlug } = profile;
+
+  console.log('📋 Mentor Profile Summary:');
+  console.log('');
+  console.log(`  Name: ${p.name_zh}`);
+  console.log(`  Institution: ${p.institution}`);
+  console.log(`  Position: ${p.position || 'N/A'}`);
+  console.log('');
+  console.log(`  Research Areas:`);
+  r.primary_fields.forEach(field => {
+    console.log(`    - ${field}`);
+  });
+  console.log('');
+  console.log(`  Key Publications: ${r.key_publications.length} papers`);
+  console.log('');
+  console.log('📁 Files:');
+  if (filePaths && filePaths.length > 0) {
+    filePaths.forEach(fp => console.log(`  - ${fp}`));
+  } else {
+    console.log(`  Profile: ~/.agents/mentors/${p.name_zh}.json (Symlinked to ~/.claude)`);
+    console.log(`  Skill:   ~/.agents/skills/${p.name_zh}/SKILL.md (Symlinked to ~/.claude)`);
+  }
+  console.log('');
+  console.log(`🚀 Usage: /${mentorSlug || p.name_zh} <question>`);
+  console.log('');
+}
+
+// ============================================================================
+// CLI Interface
+// ============================================================================
+
+async function main() {
+  const args = process.argv.slice(2);
+
+  if (args.length === 0) {
+    console.log('Usage: node skill-generator.mjs "<name>" [--affiliation "<institution>"] [--deep-analyze]');
+    console.log('');
+    console.log('Examples:');
+    console.log('  node skill-generator.mjs "Geoffrey Hinton" --affiliation "University of Toronto"');
+    console.log('  node skill-generator.mjs "Geoffrey Hinton" --deep-analyze');
+    process.exit(1);
+  }
+
+  const name = args[0];
+  const affiliationIndex = args.indexOf('--affiliation');
+  const affiliation = affiliationIndex !== -1 ? args[affiliationIndex + 1] : '';
+  const deepAnalyze = args.includes('--deep-analyze');
+
+  try {
+    await generateMentorSkill({ name, affiliation, deepAnalyze });
+  } catch (error) {
+    console.error(`Error: ${error.message}`);
+    process.exit(1);
+  }
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main();
+}
+
+export { generateMentorSkill };
+}
+
+function printSummary(profile) {
   const { profile: p, research: r } = profile;
 
   console.log('📋 Mentor Profile Summary:');
@@ -438,8 +570,8 @@ function printSummary(profile) {
   console.log(`  Key Publications: ${r.key_publications.length} papers`);
   console.log('');
   console.log('📁 Files:');
-  console.log(`  Profile: ~/.claude/mentors/${p.name_zh}.json`);
-  console.log(`  Skill:   ~/.claude/skills/${p.name_zh}/SKILL.md`);
+  console.log(`  Profile: ~/.agents/mentors/${p.name_zh}.json (Symlinked to ~/.claude)`);
+  console.log(`  Skill:   ~/.agents/skills/${p.name_zh}/SKILL.md (Symlinked to ~/.claude)`);
   console.log('');
   console.log(`🚀 Usage: /${p.name_zh} <question>`);
   console.log('');
