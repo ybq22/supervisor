@@ -15,7 +15,7 @@ import { fileURLToPath } from 'url';
 import { readFile } from 'fs/promises';
 import { createHash } from 'crypto';
 import { scanUploads, updateProcessedManifest } from './upload-scanner.mjs';
-import { parseText, parseMarkdown, parsePDF, parseEmail } from './parsers/index.mjs';
+import { parseText, parseMarkdown, parsePDF, parseEmail, parseImage, parseFeishu } from './parsers/index.mjs';
 import { mergeContent } from './content-merger.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -127,12 +127,46 @@ async function generateMentorSkill(options) {
       uploads.emails = processedEmails;
     }
 
+    // Process image files with safe iteration
+    if (uploads.images.length > 0) {
+      console.log(`  Processing ${uploads.images.length} image file(s)...`);
+      const processedImages = [];
+      for (let i = 0; i < uploads.images.length; i++) {
+        const file = uploads.images[i];
+        const result = await parseImage(file.path, { skipVision: true }); // Skip Vision API for now
+        if (result.success) {
+          console.log(`    ✓ ${file.filename} (${result.metadata?.format || 'unknown'}, ${result.metadata?.fileSizeKB || 0}KB)`);
+          processedImages.push({ ...result, sourceFile: file.filename });
+        } else {
+          console.log(`    ✗ ${file.filename}: ${result.errors.join(', ')}`);
+        }
+      }
+      uploads.images = processedImages;
+    }
+
+    // Process feishu files with safe iteration
+    if (uploads.feishu.length > 0) {
+      console.log(`  Processing ${uploads.feishu.length} feishu file(s)...`);
+      const processedFeishu = [];
+      for (let i = 0; i < uploads.feishu.length; i++) {
+        const file = uploads.feishu[i];
+        const result = await parseFeishu(file.path);
+        if (result.success) {
+          console.log(`    ✓ ${file.filename} (${result.metadata?.type || 'unknown'}, ${result.metadata?.itemCount || 0} items)`);
+          processedFeishu.push({ ...result, sourceFile: file.filename });
+        } else {
+          console.log(`    ✗ ${file.filename}: ${result.errors.join(', ')}`);
+        }
+      }
+      uploads.feishu = processedFeishu;
+    }
+
     // Store parsed uploads for merging
     parsedUploads = uploads;
 
     // Update processed manifest with SHA256 hashes
     const processedFiles = [];
-    for (const type of ['texts', 'markdown', 'pdfs', 'emails']) {
+    for (const type of ['texts', 'markdown', 'pdfs', 'emails', 'images', 'feishu']) {
       for (let i = 0; i < uploads[type].length; i++) {
         const file = uploads[type][i];
         const fileBuffer = await readFile(file.path);

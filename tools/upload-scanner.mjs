@@ -14,7 +14,8 @@ const FILE_TYPE_MAP = {
   '.webp': 'images',
   '.md': 'markdown',
   '.txt': 'text',
-  '.text': 'text'
+  '.text': 'text',
+  '.json': 'feishu'
 };
 
 // Subdirectories to scan
