@@ -63,6 +63,7 @@ async function generateMentorSkill(options) {
   const uploadsDir = path.join(process.env.HOME, '.claude', 'uploads');
   let uploads = { pdfs: [], emails: [], feishu: [], images: [], markdown: [], texts: [] };
   let parsedUploads = { pdfs: [], emails: [], feishu: [], images: [], markdown: [], texts: [] };
+  const processingErrors = [];
 
   try {
     uploads = await scanUploads(uploadsDir);
@@ -77,6 +78,10 @@ async function generateMentorSkill(options) {
       const result = await parseText(file.path);
       if (result.success) {
         processedTexts.push({ ...result, sourceFile: file.filename });
+        console.log(`    ✓ ${file.filename} (${result.metadata.characters} chars)`);
+      } else {
+        processingErrors.push({ file: file.filename, type: 'text', errors: result.errors });
+        console.log(`    ✗ ${file.filename}: ${result.errors[0] || 'failed to parse'}`);
       }
     }
     uploads.texts = processedTexts;
@@ -89,6 +94,10 @@ async function generateMentorSkill(options) {
       const result = await parseMarkdown(file.path);
       if (result.success) {
         processedMarkdown.push({ ...result, sourceFile: file.filename });
+        console.log(`    ✓ ${file.filename} (${result.metadata.wordCount} words, ${result.metadata.headings.length} headings)`);
+      } else {
+        processingErrors.push({ file: file.filename, type: 'markdown', errors: result.errors });
+        console.log(`    ✗ ${file.filename}: ${result.errors[0] || 'failed to parse'}`);
       }
     }
     uploads.markdown = processedMarkdown;
@@ -104,7 +113,8 @@ async function generateMentorSkill(options) {
           console.log(`    ✓ ${file.filename} (${result.metadata?.pageCount || 'unknown'} pages)`);
           processedPdfs.push({ ...result, sourceFile: file.filename });
         } else {
-          console.log(`    ✗ ${file.filename}: ${result.error || 'failed to parse'}`);
+          processingErrors.push({ file: file.filename, type: 'pdf', errors: result.errors });
+          console.log(`    ✗ ${file.filename}: ${result.errors[0] || 'failed to parse'}`);
         }
       }
       uploads.pdfs = processedPdfs;
@@ -121,7 +131,8 @@ async function generateMentorSkill(options) {
           console.log(`    ✓ ${file.filename} (${result.metadata?.subject || 'no subject'})`);
           processedEmails.push({ ...result, sourceFile: file.filename });
         } else {
-          console.log(`    ✗ ${file.filename}: ${result.error || 'failed to parse'}`);
+          processingErrors.push({ file: file.filename, type: 'email', errors: result.errors });
+          console.log(`    ✗ ${file.filename}: ${result.errors[0] || 'failed to parse'}`);
         }
       }
       uploads.emails = processedEmails;
@@ -138,7 +149,8 @@ async function generateMentorSkill(options) {
           console.log(`    ✓ ${file.filename} (${result.metadata?.format || 'unknown'}, ${result.metadata?.fileSizeKB || 0}KB)`);
           processedImages.push({ ...result, sourceFile: file.filename });
         } else {
-          console.log(`    ✗ ${file.filename}: ${result.errors.join(', ')}`);
+          processingErrors.push({ file: file.filename, type: 'image', errors: result.errors });
+          console.log(`    ✗ ${file.filename}: ${result.errors[0] || 'failed to parse'}`);
         }
       }
       uploads.images = processedImages;
@@ -155,10 +167,35 @@ async function generateMentorSkill(options) {
           console.log(`    ✓ ${file.filename} (${result.metadata?.type || 'unknown'}, ${result.metadata?.itemCount || 0} items)`);
           processedFeishu.push({ ...result, sourceFile: file.filename });
         } else {
-          console.log(`    ✗ ${file.filename}: ${result.errors.join(', ')}`);
+          processingErrors.push({ file: file.filename, type: 'feishu', errors: result.errors });
+          console.log(`    ✗ ${file.filename}: ${result.errors[0] || 'failed to parse'}`);
         }
       }
       uploads.feishu = processedFeishu;
+    }
+
+    // Print error summary if there were any errors
+    if (processingErrors.length > 0) {
+      const successCount = uploadCount - processingErrors.length;
+      console.log(`\n  ⚠️  Processed ${successCount}/${uploadCount} files successfully`);
+      console.log(`  ${processingErrors.length} file(s) failed to process:`);
+
+      // Group errors by type
+      const errorsByType = {};
+      processingErrors.forEach(err => {
+        if (!errorsByType[err.type]) errorsByType[err.type] = [];
+        errorsByType[err.type].push(err);
+      });
+
+      Object.entries(errorsByType).forEach(([type, errors]) => {
+        console.log(`    ${type.toUpperCase()} (${errors.length}):`);
+        errors.forEach(err => {
+          console.log(`      - ${err.file}: ${err.errors[0]}`);
+        });
+      });
+      console.log('');
+    } else {
+      console.log(`  ✓ All ${uploadCount} file(s) processed successfully\n`);
     }
 
     // Store parsed uploads for merging
@@ -234,10 +271,28 @@ async function generateMentorSkill(options) {
 
   const mergedData = mergeContent(existingSources, parsedUploads);
 
-  // Log quality assessment
-  console.log(`\n[Quality Assessment] Total sources: ${mergedData.qualityMetrics.uploadCount} uploads`);
-  console.log(`[Quality Assessment] Upload quality: ${(mergedData.qualityMetrics.totalConfidence * 100).toFixed(1)}%`);
-  console.log(`[Quality Assessment] Source diversity: ${(mergedData.qualityMetrics.sourceDiversity * 100).toFixed(1)}%`);
+  // Log enhanced quality assessment
+  const qm = mergedData.qualityMetrics;
+  console.log(`\n[Quality Assessment]`);
+  console.log(`  Overall Quality: ${qm.qualityRating} (${(qm.overallQuality * 100).toFixed(1)}%)`);
+  console.log(`  Uploads: ${qm.uploadCount} files`);
+  console.log(`  Confidence: ${(qm.totalConfidence * 100).toFixed(1)}%`);
+  console.log(`  Diversity: ${(qm.sourceDiversity * 100).toFixed(1)}% (${Object.values(qm.balanceMetrics.typeDistribution).filter(v => v > 0).length}/6 types)`);
+  console.log(`  Content: ${qm.contentMetrics.totalContentLength} chars total (${qm.contentMetrics.avgContentLength} avg)`);
+  console.log(`  Completeness: ${qm.completenessScore}/100`);
+
+  // Display suggestions if any
+  if (qm.suggestions && qm.suggestions.length > 0) {
+    console.log(`\n[Suggestions]`);
+    qm.suggestions.forEach(suggestion => {
+      const icon = {
+        critical: '❌',
+        warning: '⚠️ ',
+        info: '💡 '
+      }[suggestion.type] || '• ';
+      console.log(`  ${icon} ${suggestion.message}`);
+    });
+  }
 
   const profile = await buildProfile({
     name,
