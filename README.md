@@ -108,6 +108,30 @@
 
 ---
 
+## 📤 Upload Materials
+
+Enhance your mentor skills by uploading additional materials through six channels:
+
+**Phase 1 (Current):**
+- **Text** (.txt, .text) - Transcripts, notes, correspondence
+- **Markdown** (.md) - Notes, documentation, structured text
+
+**Phase 2-3 (Coming Soon):**
+- PDF documents
+- Email threads
+- Images/screenshots
+- Feishu exports
+
+**Quick Example:**
+```bash
+cp research_notes.md uploads/markdown/
+node tools/skill-generator.mjs "Geoffrey Hinton" --affiliation "University of Toronto"
+```
+
+**Full documentation:** See [UPLOAD_GUIDE.md](docs/UPLOAD_GUIDE.md)
+
+---
+
 ## 📖 快速开始
 
 ### ⚠️ 前提条件

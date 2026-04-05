@@ -27,3 +27,6 @@ mentors/
 .claude/mentors/
 .claude/skills/
 .env
+
+# User upload data directory
+uploads/
