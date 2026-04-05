@@ -1,95 +1,202 @@
-# 🚀 快速参考
+# Quick Start Guide
 
-## 基本用法
+Get started with distill-mentor in 3 simple steps.
 
+---
+
+## Step 1: Choose Your API Provider
+
+### Option A: Anthropic Claude (Recommended for Quality)
 ```bash
-# 全面收集信息（默认，推荐）
-/distill-mentor "导师姓名"
-
-# 指定机构
-/distill-mentor "导师姓名" --affiliation "机构名称"
-
-# 快速模式（仅 ArXiv + API）
-/distill-mentor "导师姓名" --no-browser
+export ANTHROPIC_API_KEY="sk-ant-..."
 ```
 
-## 测试工具
-
+### Option B: OpenAI (Recommended for Cost)
 ```bash
-# 测试浏览器搜索功能
-node test-puppeteer.js
-
-# 测试全面信息收集
-node test-comprehensive-search.js "导师姓名"
+export LLM_API="openai"
+export OPENAI_API_KEY="sk-..."
 ```
 
-## 信息收集维度
+💡 **Don't have an API key?**
+- Anthropic: https://console.anthropic.com/
+- OpenAI: https://platform.openai.com/api-keys
 
-浏览器搜索从 **4 个维度**收集信息：
+---
 
-1. **🎓 个人主页和学术信息**
-   - 机构页面
-   - 实验室网站
-   - Google Scholar
+## Step 2: Generate a Mentor Skill
 
-2. **📄 论文和出版物**
-   - ArXiv 论文
-   - DBLP 出版物
-   - ResearchGate
-
-3. **🎤 演讲和访谈**
-   - TED talks
-   - YouTube 视频
-   - 会议演讲
-
-4. **📚 Wikipedia 和百科**
-   - 人物传记
-   - 成就介绍
-   - 学术贡献
-
-## 数据质量评分
-
-| 分数 | 等级 | 说明 |
-|------|------|------|
-| 0.8-1.0 | ⭐⭐⭐⭐⭐ 优秀 | 可生成高质量数字分身 |
-| 0.6-0.8 | ⭐⭐⭐⭐ 良好 | 建议补充更多材料 |
-| 0.4-0.6 | ⭐⭐⭐ 一般 | 需要提供额外信息 |
-| < 0.4 | ⭐⭐ 不足 | 建议手动补充材料 |
-
-## 性能对比
-
-| 模式 | 时间 | 结果数 | 质量 |
-|------|------|--------|------|
-| 浏览器搜索 | 15-30秒 | 20-30个 | ⭐⭐⭐⭐⭐ |
-| 快速模式 | 3-5秒 | 5-10个 | ⭐⭐⭐ |
-
-## 文件位置
-
+### Basic Generation (ArXiv papers only)
 ```bash
-~/.claude/
-├── mentors/
-│   └── {导师姓名}.json          # 结构化档案
-└── skills/
-    └── {导师姓名}/
-        └── SKILL.md             # Claude Code skill
+node tools/skill-generator.mjs "Geoffrey Hinton" --affiliation "University of Toronto"
 ```
 
-## 常见问题
+### With Deep Analysis (includes public information)
+```bash
+node tools/skill-generator.mjs "Geoffrey Hinton" --affiliation "University of Toronto" --deep-analyze
+```
 
-**Q: 为什么默认使用浏览器搜索？**
-A: 为了收集更全面的信息，生成更准确的数字分身。
+### With Uploads (includes additional materials)
+```bash
+# Place files in uploads directory
+cp research_paper.pdf ~/.claude/uploads/pdfs/
+cp interview_notes.md ~/.claude/uploads/markdown/
 
-**Q: 如何使用快速模式？**
-A: 添加 `--no-browser` 参数。
+# Generate skill with uploads
+node tools/skill-generator.mjs "Geoffrey Hinton" --affiliation "University of Toronto"
+```
 
-**Q: 浏览器搜索失败怎么办？**
-A: 系统会自动回退到 DuckDuckGo API，确保继续工作。
+**Supported upload types:**
+- Text (.txt, .text)
+- Markdown (.md)
+- PDF (.pdf)
+- Email (.eml, .mbox)
+- Images (.png, .jpg, .jpeg, .gif, .webp)
+- Feishu exports (.json)
 
-**Q: 数据质量评分低怎么办？**
-A: 可以手动上传导师的简历、论文列表等补充材料。
+See [UPLOAD_GUIDE.md](docs/UPLOAD_GUIDE.md) for details.
 
-## 下一步
+---
 
-- 查看完整文档：`README.md`
-- 浏览器搜索指南：`PUPPETEER_GUIDE.md`
-- 更新日志：`CHANGELOG.md`
+## Step 3: Use Your Mentor Skill
+
+Once generated, interact with your mentor:
+
+```bash
+# Using Claude Code CLI
+/GeoffreyHinton What are your research interests?
+```
+
+Or load the skill and ask questions:
+```bash
+/GeoffreyHinton
+```
+
+Then ask: *What do you think about the future of AI?*
+
+---
+
+## 📊 What You Get
+
+After generation, you'll have:
+
+1. **Profile JSON**: `~/.claude/mentors/GeoffreyHinton.json`
+   - Complete structured profile
+   - Research themes and methodology
+   - Personality and communication style
+
+2. **Skill File**: `~/.claude/skills/GeoffreyHinton/SKILL.md`
+   - Ready-to-use mentor skill
+   - Emulates research style and perspectives
+   - Provides academic guidance
+
+3. **Analysis Report**: `reports/Geoffrey_Hinton_deep_analysis.json`
+   - Raw analysis data
+   - Source materials
+   - Confidence levels
+
+---
+
+## 🎯 Example Workflow
+
+```bash
+# 1. Set API key
+export ANTHROPIC_API_KEY="sk-ant-..."
+
+# 2. Generate mentor skill
+node tools/skill-generator.mjs "Yann LeCun" --affiliation "NYU" --deep-analyze
+
+# 3. Use the mentor
+/YannLeCun What's your approach to computer vision?
+```
+
+---
+
+## 🔧 Switching APIs
+
+Want to try a different API? Just switch environment variables:
+
+```bash
+# From Anthropic to OpenAI
+export LLM_API="openai"
+export OPENAI_API_KEY="sk-..."
+
+# Regenerate the skill
+node tools/skill-generator.mjs "Geoffrey Hinton" --affiliation "University of Toronto" --deep-analyze
+```
+
+---
+
+## 💡 Tips
+
+1. **Cost Control**: Start with basic generation (ArXiv only) to test
+2. **Better Results**: Use `--deep-analyze` for comprehensive analysis
+3. **Chinese Mentors**: Works great with Chinese names (e.g., "刘知远")
+4. **Affiliation**: Helps disambiguate authors with similar names
+5. **Multiple Mentors**: Generate as many as you want!
+
+---
+
+## 📚 Next Steps
+
+- **Full Configuration**: See `API_CONFIGURATION.md`
+- **Implementation Details**: See `IMPLEMENTATION_STATUS.md`
+- **Bug Reports**: See `BUG-FIX-REPORT.md`
+- **Project README**: See `README.md`
+
+---
+
+## 🆘 Troubleshooting
+
+### "API key not set"
+```bash
+# Check which provider is configured
+node tools/test-api-config.mjs
+
+# Set the appropriate key
+export ANTHROPIC_API_KEY="..."  # or OPENAI_API_KEY
+```
+
+### "No papers found"
+- ArXiv API might be rate-limited
+- Try again in a few minutes
+- Or use `--deep-analyze` to include public information
+
+### "Unknown skill"
+- Skill names cannot have spaces
+- Use: `/GeoffreyHinton` not `/Geoffrey Hinton`
+
+---
+
+## 🌐 中文快速参考 / Chinese Quick Reference
+
+### 基本用法 / Basic Usage
+
+```bash
+# 1. 设置 API 密钥 / Set API key
+export ANTHROPIC_API_KEY="sk-ant-..."
+# 或使用 OpenAI / Or use OpenAI:
+export LLM_API="openai"
+export OPENAI_API_KEY="sk-..."
+
+# 2. 生成导师技能 / Generate mentor skill
+node tools/skill-generator.mjs "Geoffrey Hinton" --affiliation "University of Toronto"
+
+# 3. 使用导师技能 / Use mentor skill
+/GeoffreyHinton 你喜欢什么样的研究？
+```
+
+### 支持的 API / Supported APIs
+
+- **Anthropic Claude** (默认推荐 / Recommended for quality)
+- **OpenAI** (成本更低 / Lower cost)
+
+详见: `API_CONFIGURATION.md`
+
+---
+
+**Ready to distill your first mentor?** 🚀
+
+```bash
+export ANTHROPIC_API_KEY="your-key-here"
+node tools/skill-generator.mjs "Geoffrey Hinton" --affiliation "University of Toronto"
+```

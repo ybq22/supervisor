@@ -329,6 +329,8 @@ distill-mentor/
 ## 📖 文档
 
 - 📖 [快速开始](QUICKSTART.md) - 5分钟上手指南
+- 📤 [上传指南](docs/UPLOAD_GUIDE.md) - 多渠道材料上传说明
+- 🔧 [故障排除](docs/TROUBLESHOOTING.md) - 常见问题和解决方案
 - 📖 [使用指南](docs/USAGE.md) - 详细使用说明和示例
 - 📊 [论文深度分析指南](docs/PAPER_ANALYSIS_GUIDE.md) - 深度分析功能说明
 - 🌐 [Puppeteer 配置指南](docs/PUPPETEER_GUIDE.md) - 浏览器搜索配置
