@@ -1,0 +1,14 @@
+This is a sample text file for testing the text parser.
+
+It contains multiple lines of text to verify that the parser can:
+1. Extract text content correctly
+2. Count lines, words, and characters accurately
+3. Handle different encodings including Unicode characters like 你好世界
+4. Normalize whitespace properly
+
+The file has more than 100 characters to meet the minimum requirement.
+
+Additional content to ensure we have sufficient length for testing purposes.
+This line should help verify that line counting works correctly.
+
+End of test file.
