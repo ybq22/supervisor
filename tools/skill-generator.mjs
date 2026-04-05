@@ -15,7 +15,7 @@ import { fileURLToPath } from 'url';
 import { readFile } from 'fs/promises';
 import { createHash } from 'crypto';
 import { scanUploads, updateProcessedManifest } from './upload-scanner.mjs';
-import { parseText, parseMarkdown } from './parsers/index.mjs';
+import { parseText, parseMarkdown, parsePDF, parseEmail } from './parsers/index.mjs';
 import { mergeContent } from './content-merger.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -93,12 +93,46 @@ async function generateMentorSkill(options) {
     }
     uploads.markdown = processedMarkdown;
 
+    // Process PDF files with safe iteration
+    if (uploads.pdfs.length > 0) {
+      console.log(`  Processing ${uploads.pdfs.length} pdf file(s)...`);
+      const processedPdfs = [];
+      for (let i = 0; i < uploads.pdfs.length; i++) {
+        const file = uploads.pdfs[i];
+        const result = await parsePDF(file.path);
+        if (result.success) {
+          console.log(`    ✓ ${file.filename} (${result.metadata?.pageCount || 'unknown'} pages)`);
+          processedPdfs.push({ ...result, sourceFile: file.filename });
+        } else {
+          console.log(`    ✗ ${file.filename}: ${result.error || 'failed to parse'}`);
+        }
+      }
+      uploads.pdfs = processedPdfs;
+    }
+
+    // Process email files with safe iteration
+    if (uploads.emails.length > 0) {
+      console.log(`  Processing ${uploads.emails.length} email file(s)...`);
+      const processedEmails = [];
+      for (let i = 0; i < uploads.emails.length; i++) {
+        const file = uploads.emails[i];
+        const result = await parseEmail(file.path);
+        if (result.success) {
+          console.log(`    ✓ ${file.filename} (${result.metadata?.subject || 'no subject'})`);
+          processedEmails.push({ ...result, sourceFile: file.filename });
+        } else {
+          console.log(`    ✗ ${file.filename}: ${result.error || 'failed to parse'}`);
+        }
+      }
+      uploads.emails = processedEmails;
+    }
+
     // Store parsed uploads for merging
     parsedUploads = uploads;
 
     // Update processed manifest with SHA256 hashes
     const processedFiles = [];
-    for (const type of ['texts', 'markdown']) {
+    for (const type of ['texts', 'markdown', 'pdfs', 'emails']) {
       for (let i = 0; i < uploads[type].length; i++) {
         const file = uploads[type][i];
         const fileBuffer = await readFile(file.path);
