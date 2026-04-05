@@ -112,21 +112,20 @@
 
 Enhance your mentor skills by uploading additional materials through six channels:
 
-**Phase 1-2 (Current):**
+**Phase 1-3 (Current):**
 - **Text** (.txt, .text) - Transcripts, notes, correspondence
 - **Markdown** (.md) - Notes, documentation, structured text
 - **PDF** (.pdf) - Research papers, lecture notes, documentation
 - **Email** (.eml, .mbox) - Correspondence, email threads
-
-**Phase 3 (Coming Soon):**
-- Images/screenshots
-- Feishu exports
+- **Images** (.png, .jpg, .jpeg, .gif, .webp) - Screenshots, diagrams (metadata only, Vision API pending)
+- **Feishu** (.json) - Feishu document and message exports
 
 **Quick Example:**
 ```bash
 cp research_notes.md uploads/markdown/
 cp lecture_slides.pdf uploads/pdfs/
-cp correspondence.eml uploads/emails/
+cp screenshot.png uploads/images/
+cp meeting_notes.json uploads/feishu/
 node tools/skill-generator.mjs "Geoffrey Hinton" --affiliation "University of Toronto"
 ```
 

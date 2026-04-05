@@ -84,6 +84,78 @@ cp mailing_list.mbox uploads/emails/
 - Default: Email addresses redacted as `[email]`
 - To preserve addresses: Set `includeEmails: true` option (not yet exposed in CLI)
 
+### 5. Images and Screenshots (.png, .jpg, .jpeg, .gif, .webp)
+
+Image files containing screenshots, diagrams, or visual content.
+
+**Use for:** Screenshots of websites, diagrams, handwritten notes, photos of documents
+
+**Format:** Common image formats
+
+**Extraction:** (Current implementation: Basic metadata only)
+- Format (png, jpg, etc.)
+- File size
+- Extraction timestamp
+
+**Limitations:**
+- **Vision API integration pending** - OCR and visual description not yet implemented
+- Currently only extracts basic metadata
+- Full image analysis requires MCP Vision API tool
+
+**Future capabilities:**
+- OCR text extraction from images
+- Visual description of diagrams and charts
+- Context understanding of screenshots
+
+**Example:**
+```bash
+cp screenshot.png uploads/images/
+cp diagram.jpg uploads/images/
+```
+
+**Note:** For now, images are processed with metadata only. Full Vision API integration will be added in a future update.
+
+### 6. Feishu Exports (.json)
+
+JSON exports from Feishu (飞书), a collaborative workspace platform.
+
+**Use for:** Feishu documents, messages, wikis, and collaborative content
+
+**Format:** JSON export files
+
+**Extraction:** Messages, documents, metadata, comments
+
+**Supported structures:**
+- **Single document:** `{ title, content, creator, comments[] }`
+- **Batch export:** `{ documents: [{ title, content }, ...] }`
+- **Messages export:** `{ messages: [{ sender, content, timestamp }, ...] }`
+
+**Features:**
+- Automatically detects structure type
+- Extracts messages with sender information
+- Preserves document hierarchy
+- Handles comments and metadata
+
+**Limitations:**
+- Feishu Open API integration not yet implemented (manual export required)
+- Nested subdirectories (e.g., `feishu/json/`) not scanned - place files directly in `uploads/feishu/`
+- Complex nested structures may use generic extraction
+
+**Example:**
+```bash
+# Export from Feishu web interface -> JSON
+cp feishu_export.json uploads/feishu/
+cp meeting_notes.json uploads/feishu/
+```
+
+**Exporting from Feishu:**
+1. Open Feishu web interface
+2. Navigate to document or message
+3. Use export feature to save as JSON
+4. Place exported file in `uploads/feishu/`
+
+**Note:** Currently supports JSON exports only. Markdown exports from Feishu should be placed in `uploads/markdown/` instead.
+
 ## Quick Start
 
 1. **Place files in appropriate directories:**
@@ -92,6 +164,8 @@ cp mailing_list.mbox uploads/emails/
    cp research_notes.md uploads/markdown/
    cp lecture_slides.pdf uploads/pdfs/
    cp correspondence.eml uploads/emails/
+   cp screenshot.png uploads/images/
+   cp feishu_export.json uploads/feishu/
    ```
 
 2. **Generate mentor skill:**
@@ -109,15 +183,19 @@ cp mailing_list.mbox uploads/emails/
 # Add materials
 cp professor_paper.pdf uploads/pdfs/
 cp email_thread.eml uploads/emails/
+cp diagram.png uploads/images/
+cp meeting_notes.json uploads/feishu/
 
 # Generate skill
 node tools/skill-generator.mjs "Geoffrey Hinton" --affiliation "University of Toronto"
 
 # Output includes:
-# [Upload Scanner] Found 2 new upload(s) to process
+# [Upload Scanner] Found 4 new upload(s) to process
 # [PDF Parser] ✓ professor_paper.pdf (15 pages, 42KB)
 # [Email Parser] ✓ email_thread.eml (Research collaboration discussion)
-# ✓ Processed 2/2 files successfully
+# [Image Parser] ✓ diagram.png (png, 156KB)
+# [Feishu Parser] ✓ meeting_notes.json (document, 1 items)
+# ✓ Processed 4/4 files successfully
 ```
 
 ## Directory Structure
@@ -128,13 +206,13 @@ uploads/
 ├── markdown/       # Markdown documents (.md)
 ├── pdfs/           # PDF documents (.pdf)
 ├── emails/         # Email files (.eml, .mbox)
-├── feishu/         # Feishu exports (coming in Phase 3)
-│   ├── json/       # JSON exports
-│   └── markdown/   # Markdown exports
-├── images/         # Images and screenshots (coming in Phase 3)
+├── feishu/         # Feishu JSON exports (.json)
+├── images/         # Images and screenshots (.png, .jpg, .jpeg, .gif, .webp)
 └── processed/      # Tracking manifest (auto-generated)
                     # .processed_manifest.json
 ```
+
+**Note:** Place files directly in the type-specific subdirectories (e.g., `uploads/feishu/file.json`, not `uploads/feishu/json/file.json`). The scanner processes one level deep only.
 
 ## Quality Tips
 
@@ -159,6 +237,19 @@ uploads/
    - Complete email threads provide better context
    - .eml files for single emails, .mbox for archives
    - Email addresses are redacted by default for privacy
+
+7. **Image-specific:**
+   - Clear, high-resolution images work best
+   - **Vision API integration pending** - currently metadata only
+   - Screenshots should capture visible text clearly
+   - Diagrams should be high contrast for better OCR
+
+8. **Feishu-specific:**
+   - Export as JSON from Feishu web interface
+   - Complete documents provide better context
+   - Batch exports work well for multiple documents
+   - Messages exports show communication patterns
+   - Place files directly in `uploads/feishu/` (not in nested subdirectories)
 
 ## Troubleshooting
 
@@ -192,3 +283,19 @@ uploads/
 - Email addresses are redacted by default ([email])
 - Only the message body and headers are extracted
 - Attachments are not extracted or stored
+
+**Image processing issues?**
+- **"Vision API integration pending"**: Expected - currently only metadata extraction
+- **"Invalid file extension"**: Check file has supported extension (.png, .jpg, .jpeg, .gif, .webp)
+- **"Failed to read image"**: File may be corrupted
+- Solution: Ensure images are valid and not corrupted
+- **Note:** Full OCR and visual description coming in future update
+
+**Feishu parsing issues?**
+- **"Invalid file extension"**: Must be .json file
+- **"Failed to parse JSON"**: Malformed JSON syntax
+- **"Unknown Feishu JSON structure"**: Unrecognized export format
+  - System will attempt generic text extraction
+  - May have lower confidence score
+- **"File not detected"**: Check file is directly in `uploads/feishu/`, not in nested subdirectories
+- Solution: Export as JSON from Feishu, place directly in feishu directory
