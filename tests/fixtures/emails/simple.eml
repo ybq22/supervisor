@@ -1,0 +1,28 @@
+From: sender@example.com
+To: recipient1@example.com, recipient2@example.com
+Cc: cc1@example.com, cc2@example.com
+Subject: Test Email with HTML Content
+Date: Mon, 05 Apr 2026 10:30:00 +0000
+Message-ID: <test123@example.com>
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="boundary123"
+
+--boundary123
+Content-Type: text/plain; charset=utf-8
+
+This is the plain text version of the email.
+
+It has multiple paragraphs.
+
+Contact: support@example.com
+--boundary123
+Content-Type: text/html; charset=utf-8
+
+<html>
+<body>
+<h1>HTML Email Content</h1>
+<p>This is the <strong>HTML version</strong> of the email.</p>
+<p>Contact us at <a href="mailto:support@example.com">support@example.com</a></p>
+</body>
+</html>
+--boundary123--
