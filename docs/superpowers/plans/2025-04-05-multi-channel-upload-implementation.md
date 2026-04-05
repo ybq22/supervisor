@@ -1223,3 +1223,37 @@ uploads/
 **Already processed?**
 - Files are tracked and not re-processed
 - Delete `uploads/processed/.processed_manifest.json` to force re-processing
+
+### Task 9: Update .gitignore
+
+**Files:**
+- Modify: `.gitignore`
+
+- [ ] **Step 1: Add uploads directory to gitignore**
+
+```bash
+echo "" >> .gitignore
+echo "# Upload directories (user data)" >> .gitignore
+echo "uploads/" >> .gitignore
+```
+
+- [ ] **Step 2: Verify .gitignore**
+
+```bash
+cat .gitignore | tail -3
+```
+
+Expected output:
+```
+# Upload directories (user data)
+uploads/
+```
+
+- [ ] **Step 3: Commit gitignore update**
+
+```bash
+git add .gitignore
+git commit -m "chore: ignore uploads directory in git"
+```
+
+---
