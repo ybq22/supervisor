@@ -7,7 +7,9 @@
     "test": "node test-functions.js"
   },
   "dependencies": {
+    "mailparser": "^3.9.6",
     "marked": "^17.0.5",
+    "pdf-parse": "^2.4.5",
     "puppeteer": "^22.0.0"
   },
   "keywords": [
