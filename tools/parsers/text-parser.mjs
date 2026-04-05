@@ -44,6 +44,12 @@ export async function parseText(filePath, options = {}) {
       return result;
     }
 
+    // Early validation for empty files
+    if (buffer.length === 0) {
+      result.errors.push('File is empty');
+      return result;
+    }
+
     // Try different encodings
     let content = null;
     let encoding = 'utf-8';
@@ -52,16 +58,10 @@ export async function parseText(filePath, options = {}) {
     for (const enc of encodings) {
       content = buffer.toString(enc);
 
-      // For empty files, accept the first encoding
-      if (content.length === 0) {
-        encoding = enc;
-        break;
-      }
-
       // Validate that content is readable text
       // Check for excessive null bytes or control characters (except common whitespace)
       const nullByteCount = (content.match(/\x00/g) || []).length;
-      const controlCharCount = (content.match(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g) || []).length;
+      const controlCharCount = (content.match(/[\x01-\x08\x0B\x0C\x0E-\x1F\x7F]/g) || []).length;
 
       // If more than 5% of characters are null bytes or control characters, encoding is likely wrong
       if ((nullByteCount + controlCharCount) / content.length < 0.05) {

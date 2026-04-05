@@ -138,8 +138,8 @@ describe('Text Parser', () => {
 
       assert.strictEqual(result.success, false);
       assert.ok(
-        result.errors.includes('Insufficient content: File must contain at least 100 characters') ||
-        result.errors.some(e => e.includes('Insufficient content'))
+        result.errors.includes('File is empty') ||
+        result.errors.some(e => e.includes('empty'))
       );
 
       // Cleanup
