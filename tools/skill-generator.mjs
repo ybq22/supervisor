@@ -12,6 +12,11 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { readFile } from 'fs/promises';
+import { createHash } from 'crypto';
+import { scanUploads, updateProcessedManifest } from './upload-scanner.mjs';
+import { parseText, parseMarkdown } from './parsers/index.mjs';
+import { mergeContent } from './content-merger.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -53,8 +58,69 @@ async function generateMentorSkill(options) {
   }
   console.log('');
 
+  // Step 0: Scan uploads directory
+  console.log('Step 0: Scanning uploads directory...');
+  const uploadsDir = path.join(process.env.HOME, '.claude', 'uploads');
+  let uploads = { pdfs: [], emails: [], feishu: [], images: [], markdown: [], texts: [] };
+  let parsedUploads = { pdfs: [], emails: [], feishu: [], images: [], markdown: [], texts: [] };
+
+  try {
+    uploads = await scanUploads(uploadsDir);
+    const uploadCount = Object.values(uploads).reduce((sum, arr) => sum + arr.length, 0);
+    console.log(`  ✓ Found ${uploadCount} new upload(s) to process`);
+
+    // Process text files with safe iteration
+    const processedTexts = [];
+    for (let i = 0; i < uploads.texts.length; i++) {
+      const file = uploads.texts[i];
+      console.log(`    - Processing text file: ${file.filename}`);
+      const result = await parseText(file.path);
+      if (result.success) {
+        processedTexts.push({ ...result, sourceFile: file.filename });
+      }
+    }
+    uploads.texts = processedTexts;
+
+    // Process markdown files with safe iteration
+    const processedMarkdown = [];
+    for (let i = 0; i < uploads.markdown.length; i++) {
+      const file = uploads.markdown[i];
+      console.log(`    - Processing markdown file: ${file.filename}`);
+      const result = await parseMarkdown(file.path);
+      if (result.success) {
+        processedMarkdown.push({ ...result, sourceFile: file.filename });
+      }
+    }
+    uploads.markdown = processedMarkdown;
+
+    // Store parsed uploads for merging
+    parsedUploads = uploads;
+
+    // Update processed manifest with SHA256 hashes
+    const processedFiles = [];
+    for (const type of ['texts', 'markdown']) {
+      for (let i = 0; i < uploads[type].length; i++) {
+        const file = uploads[type][i];
+        const fileBuffer = await readFile(file.path);
+        const hash = createHash('sha256').update(fileBuffer).digest('hex');
+        processedFiles.push({
+          filename: file.sourceFile,
+          hash,
+          processedAt: new Date().toISOString()
+        });
+      }
+    }
+
+    if (processedFiles.length > 0) {
+      await updateProcessedManifest(uploadsDir, processedFiles);
+      console.log(`  ✓ Updated processed manifest with ${processedFiles.length} file(s)`);
+    }
+  } catch (error) {
+    console.log(`  ⚠️  Upload scanning failed: ${error.message}`);
+  }
+
   // Step 1: Collect information
-  console.log('Step 1: Collecting information...');
+  console.log('\nStep 1: Collecting information...');
   const arxivTool = await loadTool('arxiv-search');
   const puppeteerTool = await loadTool('puppeteer-search');
 
@@ -91,11 +157,26 @@ async function generateMentorSkill(options) {
 
   // Step 3: Build profile
   console.log('\nStep 3: Building mentor profile...');
+
+  // Merge uploads with existing sources using content merger
+  const existingSources = {
+    arxivPapers: papers,
+    webSearch: websites
+  };
+
+  const mergedData = mergeContent(existingSources, parsedUploads);
+
+  // Log quality assessment
+  console.log(`\n[Quality Assessment] Total sources: ${mergedData.qualityMetrics.uploadCount} uploads`);
+  console.log(`[Quality Assessment] Upload quality: ${(mergedData.qualityMetrics.totalConfidence * 100).toFixed(1)}%`);
+  console.log(`[Quality Assessment] Source diversity: ${(mergedData.qualityMetrics.sourceDiversity * 100).toFixed(1)}%`);
+
   const profile = await buildProfile({
     name,
     affiliation,
     papers,
-    websites
+    websites,
+    mergedData
   });
 
   // Step 4: Generate skill
@@ -111,6 +192,23 @@ async function generateMentorSkill(options) {
  */
 async function buildProfile(info) {
   const now = new Date().toISOString();
+
+  // Extract merged data if available
+  const uploads = info.mergedData?.sources?.uploads || {
+    pdfs: [],
+    emails: [],
+    feishu: [],
+    images: [],
+    markdown: [],
+    texts: []
+  };
+
+  // Extract quality metrics if available
+  const qualityMetrics = info.mergedData?.qualityMetrics || {
+    uploadCount: 0,
+    totalConfidence: 0,
+    sourceDiversity: 0
+  };
 
   // Extract primary fields from papers
   const primaryFields = extractResearchFields(info.papers, info.websites);
@@ -159,7 +257,19 @@ async function buildProfile(info) {
     source_materials: {
       papers_count: info.papers.length,
       websites_visited: info.websites.map(w => w.url),
-      user_uploads: []
+      user_uploads: {
+        texts: uploads.texts.map(t => t.sourceFile),
+        markdown: uploads.markdown.map(m => m.sourceFile),
+        pdfs: uploads.pdfs.map(p => p.filename),
+        emails: uploads.emails.map(e => e.filename),
+        images: uploads.images.map(i => i.filename),
+        feishu: uploads.feishu.map(f => f.filename)
+      },
+      quality_metrics: {
+        upload_count: qualityMetrics.uploadCount,
+        total_confidence: qualityMetrics.totalConfidence,
+        source_diversity: qualityMetrics.sourceDiversity
+      }
     }
   };
 }
