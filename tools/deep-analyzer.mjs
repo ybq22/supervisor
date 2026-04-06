@@ -15,6 +15,8 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { searchNews } from './news-search.mjs';
+import { searchArxiv } from './arxiv-search.mjs';
+import { analyzePaperContent, analyzePublicContent, analyzeMultiplePapers, aggregatePaperAnalysis } from './content-analyzer.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -77,20 +79,72 @@ async function deepAnalyzeMentor(name, affiliation = '') {
  * Perform deep paper analysis
  */
 async function performDeepPaperAnalysis(name, newsResults) {
-  // This would call the paper analysis module
-  // For now, return a placeholder
+  console.log('  📚 Fetching papers from ArXiv...');
+
+  // Get papers from ArXiv
+  const papers = await searchArxiv(name, 20);
+
+  if (papers.length === 0) {
+    console.log('  ⚠️  No papers found on ArXiv');
+    return {
+      analysis_type: 'deep_paper_analysis',
+      status: 'no_papers_found',
+      papers_analyzed: 0,
+      placeholder_profile: {
+        research_themes: [],
+        problem_preferences: {},
+        methodology: {},
+        visualization_style: {},
+        writing_style: {},
+        thinking_pattern: {},
+        academic_values: [],
+        paper_organization: {}
+      }
+    };
+  }
+
+  console.log(`  ✓ Found ${papers.length} papers`);
+
+  // Analyze multiple papers using Claude API
+  const analyses = await analyzeMultiplePapers(papers, name);
+
+  if (analyses.length === 0) {
+    console.log('  ⚠️  Paper analysis failed, returning placeholder');
+    return {
+      analysis_type: 'deep_paper_analysis',
+      status: 'analysis_failed',
+      papers_analyzed: papers.length,
+      note: 'Claude API analysis failed - check ANTHROPIC_API_KEY',
+      placeholder_profile: {
+        research_themes: [],
+        problem_preferences: {},
+        methodology: {},
+        visualization_style: {},
+        writing_style: {},
+        thinking_pattern: {},
+        academic_values: [],
+        paper_organization: {}
+      }
+    };
+  }
+
+  // Aggregate analyses
+  const aggregated = aggregatePaperAnalysis(analyses);
+
   return {
     analysis_type: 'deep_paper_analysis',
     status: 'completed',
-    note: 'Full implementation would analyze complete paper texts',
-    placeholder_profile: {
+    papers_analyzed: analyses.length,
+    papers_considered: papers.length,
+    analysis_date: new Date().toISOString(),
+    profile: aggregated || {
       research_themes: [],
       problem_preferences: {},
       methodology: {},
       visualization_style: {},
       writing_style: {},
       thinking_pattern: {},
-      academic_values: {},
+      academic_values: [],
       paper_organization: {}
     }
   };
@@ -100,18 +154,21 @@ async function performDeepPaperAnalysis(name, newsResults) {
  * Perform public information analysis
  */
 async function performPublicInfoAnalysis(name, newsResults) {
+  console.log('  🔍 Analyzing public information...');
+
   const analysis = {
     personality: {},
     work_style: {},
     communication: {},
     academic_philosophy: {},
     social: {},
-    values: {},
-    interests: {},
+    values: [],
+    interests: [],
+    sources_analyzed: 0,
     sources: []
   };
 
-  // Extract information from search results
+  // Collect sources from search results
   const categories = ['interviews', 'talks', 'news', 'profiles', 'blogs', 'social_media'];
 
   categories.forEach(category => {
@@ -126,12 +183,58 @@ async function performPublicInfoAnalysis(name, newsResults) {
     });
   });
 
-  // Return analysis
+  console.log(`  📊 Found ${analysis.sources.length} sources`);
+
+  // Analyze a few key sources using Claude API
+  // For now, we'll analyze based on snippets since full content extraction requires web scraping
+  const keySources = analysis.sources.slice(0, 3); // Analyze top 3 sources
+
+  for (const source of keySources) {
+    const content = `${source.title}\n\n${source.snippet}`;
+    const contentType = source.type.slice(0, -1); // Remove 's' from end (e.g., 'interviews' -> 'interview')
+
+    try {
+      console.log(`    - Analyzing ${contentType}: ${source.title.substring(0, 50)}...`);
+      const result = await analyzePublicContent(content, contentType, name);
+
+      if (!result.error) {
+        // Aggregate results
+        if (result.personality && Object.keys(result.personality).length > 0) {
+          analysis.personality = result.personality;
+        }
+        if (result.work_style && Object.keys(result.work_style).length > 0) {
+          analysis.work_style = result.work_style;
+        }
+        if (result.communication && Object.keys(result.communication).length > 0) {
+          analysis.communication = result.communication;
+        }
+        if (result.academic_philosophy && Object.keys(result.academic_philosophy).length > 0) {
+          analysis.academic_philosophy = result.academic_philosophy;
+        }
+        if (result.values && result.values.length > 0) {
+          analysis.values = [...new Set([...analysis.values, ...result.values])];
+        }
+        if (result.interests && result.interests.length > 0) {
+          analysis.interests = [...new Set([...analysis.interests, ...result.interests])];
+        }
+
+        analysis.sources_analyzed++;
+      }
+
+      // Small delay to avoid rate limits
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    } catch (error) {
+      console.log(`    ⚠️  Analysis failed for ${source.url}: ${error.message}`);
+    }
+  }
+
+  console.log(`  ✓ Analyzed ${analysis.sources_analyzed} sources`);
+
   return {
     analysis_type: 'public_info_analysis',
-    status: 'completed',
+    status: analysis.sources_analyzed > 0 ? 'completed' : 'no_content_analyzed',
     sources_count: analysis.sources.length,
-    note: 'Full implementation would analyze source content with Claude API',
+    sources_analyzed: analysis.sources_analyzed,
     ...analysis
   };
 }
@@ -140,6 +243,9 @@ async function performPublicInfoAnalysis(name, newsResults) {
  * Integrate paper and public info analyses
  */
 async function integrateProfiles(name, paperAnalysis, publicInfoAnalysis) {
+  // Get profile from paper analysis (might be placeholder_profile for backwards compat)
+  const paperProfile = paperAnalysis.profile || paperAnalysis.placeholder_profile || {};
+
   return {
     mentor_name: name,
     integration_date: new Date().toISOString(),
@@ -150,36 +256,38 @@ async function integrateProfiles(name, paperAnalysis, publicInfoAnalysis) {
     integrated_dimensions: {
       // Research characteristics from papers
       research_identity: {
-        core_themes: paperAnalysis.placeholder_profile?.research_themes || [],
-        problem_preferences: paperAnalysis.placeholder_profile?.problem_preferences || {},
-        methodology: paperAnalysis.placeholder_profile?.methodology || {}
+        core_themes: paperProfile.research_themes || [],
+        problem_preferences: paperProfile.problem_preferences || {},
+        methodology: paperProfile.methodology || {}
       },
 
       // Communication and style from both sources
       communication_style: {
-        writing: paperAnalysis.placeholder_profile?.writing_style || {},
+        writing: paperProfile.writing_style || {},
         speaking: publicInfoAnalysis.communication?.speaking || {},
-        presentation: paperAnalysis.placeholder_profile?.visualization_style || {}
+        presentation: paperProfile.visualization_style || {}
       },
 
       // Personality and work style from public info
       personality_and_work: {
         traits: publicInfoAnalysis.personality || {},
         work_style: publicInfoAnalysis.work_style || {},
-        values: publicInfoAnalysis.values || {}
+        values: publicInfoAnalysis.values || []
       },
 
       // Academic philosophy from both
       academic_philosophy: {
-        research: paperAnalysis.placeholder_profile?.thinking_pattern || {},
+        research: paperProfile.thinking_pattern || {},
         teaching: publicInfoAnalysis.academic_philosophy?.teaching || {},
         service: publicInfoAnalysis.social || {}
       }
     },
 
     confidence_level: {
-      overall: 'medium',
-      note: 'Confidence increases with more source material'
+      overall: paperAnalysis.status === 'completed' && publicInfoAnalysis.sources_analyzed > 0
+        ? 'medium'
+        : 'low',
+      note: 'Confidence increases with more source material and successful API analysis'
     },
 
     recommendations: {
@@ -187,7 +295,8 @@ async function integrateProfiles(name, paperAnalysis, publicInfoAnalysis) {
         'Provide full text papers for deeper analysis',
         'Provide transcripts of talks and interviews',
         'Provide blog posts and social media content',
-        'Provide student evaluations and recommendations'
+        'Provide student evaluations and recommendations',
+        'Ensure ANTHROPIC_API_KEY is set for content analysis'
       ]
     }
   };
