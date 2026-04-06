@@ -14,7 +14,16 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { readFile } from 'fs/promises';
 import { createHash } from 'crypto';
-import { scanUploads, updateProcessedManifest } from './upload-scanner.mjs';
+import {
+  createWorkspace,
+  getWorkspacePath,
+  addUpload,
+  saveProcessedContent,
+  saveArxivPapers,
+  saveWebResults,
+  getWorkspaceMetadata
+} from './workspace-manager.mjs';
+import { scanUploads } from './upload-scanner.mjs';
 import { parseText, parseMarkdown, parsePDF, parseEmail, parseImage, parseFeishu } from './parsers/index.mjs';
 import { mergeContent } from './content-merger.mjs';
 
@@ -50,193 +59,174 @@ async function generateMentorSkill(options) {
     deepAnalyze = false,
     arxivLimit = 20,
     browserSearch = true,
-    uploadsDir = null  // New: allow custom uploads directory
+    upload = null,        // Single file to upload
+    incremental = false   // Incremental mode (don't regenerate everything)
   } = options;
 
   console.log(`\n🎓 Starting mentor distillation: ${name}`);
   if (affiliation) {
     console.log(`🏢 Affiliation: ${affiliation}`);
   }
+  if (upload) {
+    console.log(`📤 Upload: ${upload}`);
+  }
+  if (incremental) {
+    console.log(`🔄 Incremental mode: updating existing workspace`);
+  }
   console.log('');
 
-  // Step 0: Scan uploads directory
-  console.log('Step 0: Scanning uploads directory...');
+  // Create or get workspace
+  const workspacePath = await createWorkspace(name);
+  console.log(`📁 Workspace: ${workspacePath}`);
+  console.log('');
 
-  // Determine uploads directory:
-  // 1. Use provided directory if specified
-  // 2. Otherwise, use mentor-specific directory: ~/.claude/uploads/{mentor_name}/
-  let actualUploadsDir;
-  if (uploadsDir) {
-    actualUploadsDir = uploadsDir;
-    console.log(`  Using custom uploads directory: ${uploadsDir}`);
-  } else {
-    // Create mentor-specific directory
-    const mentorSlug = name.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_');
-    actualUploadsDir = path.join(process.env.HOME, '.claude', 'uploads', mentorSlug);
-    console.log(`  Using mentor-specific directory: ~/.claude/uploads/${mentorSlug}/`);
+  // Handle single file upload
+  if (upload) {
+    console.log('Step 0: Processing uploaded file...');
+    try {
+      const uploadResult = await addUpload(name, upload);
+      console.log(`  ✓ Uploaded: ${uploadResult.filename}`);
+
+      // Parse the uploaded file
+      const ext = uploadResult.ext;
+      let parsedResult;
+
+      switch (ext) {
+        case '.txt':
+        case '.text':
+          parsedResult = await parseText(uploadResult.storedPath);
+          break;
+        case '.md':
+          parsedResult = await parseMarkdown(uploadResult.storedPath);
+          break;
+        case '.pdf':
+          parsedResult = await parsePDF(uploadResult.storedPath);
+          break;
+        case '.eml':
+        case '.mbox':
+          parsedResult = await parseEmail(uploadResult.storedPath);
+          break;
+        case '.json':
+          parsedResult = await parseFeishu(uploadResult.storedPath);
+          break;
+        default:
+          console.log(`  ⚠️  Unsupported file type: ${ext}`);
+          parsedResult = { success: false };
+      }
+
+      if (parsedResult.success) {
+        await saveProcessedContent(name, uploadResult.storedPath, parsedResult);
+        console.log(`  ✓ Processed and saved to workspace`);
+      } else {
+        console.log(`  ✗ Processing failed: ${parsedResult.errors.join(', ')}`);
+      }
+
+      // If only uploading and incremental mode, skip the rest
+      if (incremental) {
+        console.log('\n✅ Upload and incremental processing complete!');
+        console.log(`\n💡 Tip: Run without --incremental to generate full skill`);
+        return;
+      }
+    } catch (error) {
+      console.error(`  ❌ Upload failed: ${error.message}`);
+      return;
+    }
   }
 
-  let uploads = { pdfs: [], emails: [], feishu: [], images: [], markdown: [], texts: [] };
-  let parsedUploads = { pdfs: [], emails: [], feishu: [], images: [], markdown: [], texts: [] };
-  const processingErrors = [];
+  // Load processed content from workspace
+  let parsedUploads = {
+    texts: [],
+    markdown: [],
+    pdfs: [],
+    emails: [],
+    images: [],
+    feishu: []
+  };
 
   try {
-    uploads = await scanUploads(actualUploadsDir);
-    const uploadCount = Object.values(uploads).reduce((sum, arr) => sum + arr.length, 0);
-    console.log(`  ✓ Found ${uploadCount} new upload(s) to process`);
+    const processedDir = path.join(workspacePath, 'processed');
 
-    // Process text files with safe iteration
-    const processedTexts = [];
-    for (let i = 0; i < uploads.texts.length; i++) {
-      const file = uploads.texts[i];
-      console.log(`    - Processing text file: ${file.filename}`);
-      const result = await parseText(file.path);
-      if (result.success) {
-        processedTexts.push({ ...result, sourceFile: file.filename });
-        console.log(`    ✓ ${file.filename} (${result.metadata.characters} chars)`);
-      } else {
-        processingErrors.push({ file: file.filename, type: 'text', errors: result.errors });
-        console.log(`    ✗ ${file.filename}: ${result.errors[0] || 'failed to parse'}`);
-      }
-    }
-    uploads.texts = processedTexts;
-
-    // Process markdown files with safe iteration
-    const processedMarkdown = [];
-    for (let i = 0; i < uploads.markdown.length; i++) {
-      const file = uploads.markdown[i];
-      console.log(`    - Processing markdown file: ${file.filename}`);
-      const result = await parseMarkdown(file.path);
-      if (result.success) {
-        processedMarkdown.push({ ...result, sourceFile: file.filename });
-        console.log(`    ✓ ${file.filename} (${result.metadata.wordCount} words, ${result.metadata.headings.length} headings)`);
-      } else {
-        processingErrors.push({ file: file.filename, type: 'markdown', errors: result.errors });
-        console.log(`    ✗ ${file.filename}: ${result.errors[0] || 'failed to parse'}`);
-      }
-    }
-    uploads.markdown = processedMarkdown;
-
-    // Process PDF files with safe iteration
-    if (uploads.pdfs.length > 0) {
-      console.log(`  Processing ${uploads.pdfs.length} pdf file(s)...`);
-      const processedPdfs = [];
-      for (let i = 0; i < uploads.pdfs.length; i++) {
-        const file = uploads.pdfs[i];
-        const result = await parsePDF(file.path);
-        if (result.success) {
-          console.log(`    ✓ ${file.filename} (${result.metadata?.pageCount || 'unknown'} pages)`);
-          processedPdfs.push({ ...result, sourceFile: file.filename });
-        } else {
-          processingErrors.push({ file: file.filename, type: 'pdf', errors: result.errors });
-          console.log(`    ✗ ${file.filename}: ${result.errors[0] || 'failed to parse'}`);
+    // Load processed texts
+    const textsPath = path.join(processedDir, 'texts');
+    try {
+      const textFiles = await fs.readdir(textsPath);
+      for (const file of textFiles) {
+        if (file.endsWith('.json')) {
+          const content = JSON.parse(await fs.readFile(path.join(textsPath, file), 'utf8'));
+          parsedUploads.texts.push(content);
         }
       }
-      uploads.pdfs = processedPdfs;
-    }
+    } catch {}
 
-    // Process email files with safe iteration
-    if (uploads.emails.length > 0) {
-      console.log(`  Processing ${uploads.emails.length} email file(s)...`);
-      const processedEmails = [];
-      for (let i = 0; i < uploads.emails.length; i++) {
-        const file = uploads.emails[i];
-        const result = await parseEmail(file.path);
-        if (result.success) {
-          console.log(`    ✓ ${file.filename} (${result.metadata?.subject || 'no subject'})`);
-          processedEmails.push({ ...result, sourceFile: file.filename });
-        } else {
-          processingErrors.push({ file: file.filename, type: 'email', errors: result.errors });
-          console.log(`    ✗ ${file.filename}: ${result.errors[0] || 'failed to parse'}`);
+    // Load processed markdown
+    const markdownPath = path.join(processedDir, 'markdown');
+    try {
+      const mdFiles = await fs.readdir(markdownPath);
+      for (const file of mdFiles) {
+        if (file.endsWith('.json')) {
+          const content = JSON.parse(await fs.readFile(path.join(markdownPath, file), 'utf8'));
+          parsedUploads.markdown.push(content);
         }
       }
-      uploads.emails = processedEmails;
-    }
+    } catch {}
 
-    // Process image files with safe iteration
-    if (uploads.images.length > 0) {
-      console.log(`  Processing ${uploads.images.length} image file(s)...`);
-      const processedImages = [];
-      for (let i = 0; i < uploads.images.length; i++) {
-        const file = uploads.images[i];
-        const result = await parseImage(file.path, { skipVision: true }); // Skip Vision API for now
-        if (result.success) {
-          console.log(`    ✓ ${file.filename} (${result.metadata?.format || 'unknown'}, ${result.metadata?.fileSizeKB || 0}KB)`);
-          processedImages.push({ ...result, sourceFile: file.filename });
-        } else {
-          processingErrors.push({ file: file.filename, type: 'image', errors: result.errors });
-          console.log(`    ✗ ${file.filename}: ${result.errors[0] || 'failed to parse'}`);
+    // Load processed PDFs
+    const pdfsPath = path.join(processedDir, 'pdfs');
+    try {
+      const pdfFiles = await fs.readdir(pdfsPath);
+      for (const file of pdfFiles) {
+        if (file.endsWith('.json')) {
+          const content = JSON.parse(await fs.readFile(path.join(pdfsPath, file), 'utf8'));
+          parsedUploads.pdfs.push(content);
         }
       }
-      uploads.images = processedImages;
-    }
+    } catch {}
 
-    // Process feishu files with safe iteration
-    if (uploads.feishu.length > 0) {
-      console.log(`  Processing ${uploads.feishu.length} feishu file(s)...`);
-      const processedFeishu = [];
-      for (let i = 0; i < uploads.feishu.length; i++) {
-        const file = uploads.feishu[i];
-        const result = await parseFeishu(file.path);
-        if (result.success) {
-          console.log(`    ✓ ${file.filename} (${result.metadata?.type || 'unknown'}, ${result.metadata?.itemCount || 0} items)`);
-          processedFeishu.push({ ...result, sourceFile: file.filename });
-        } else {
-          processingErrors.push({ file: file.filename, type: 'feishu', errors: result.errors });
-          console.log(`    ✗ ${file.filename}: ${result.errors[0] || 'failed to parse'}`);
+    // Load processed emails
+    const emailsPath = path.join(processedDir, 'emails');
+    try {
+      const emailFiles = await fs.readdir(emailsPath);
+      for (const file of emailFiles) {
+        if (file.endsWith('.json')) {
+          const content = JSON.parse(await fs.readFile(path.join(emailsPath, file), 'utf8'));
+          parsedUploads.emails.push(content);
         }
       }
-      uploads.feishu = processedFeishu;
-    }
+    } catch {}
 
-    // Print error summary if there were any errors
-    if (processingErrors.length > 0) {
-      const successCount = uploadCount - processingErrors.length;
-      console.log(`\n  ⚠️  Processed ${successCount}/${uploadCount} files successfully`);
-      console.log(`  ${processingErrors.length} file(s) failed to process:`);
-
-      // Group errors by type
-      const errorsByType = {};
-      processingErrors.forEach(err => {
-        if (!errorsByType[err.type]) errorsByType[err.type] = [];
-        errorsByType[err.type].push(err);
-      });
-
-      Object.entries(errorsByType).forEach(([type, errors]) => {
-        console.log(`    ${type.toUpperCase()} (${errors.length}):`);
-        errors.forEach(err => {
-          console.log(`      - ${err.file}: ${err.errors[0]}`);
-        });
-      });
-      console.log('');
-    } else {
-      console.log(`  ✓ All ${uploadCount} file(s) processed successfully\n`);
-    }
-
-    // Store parsed uploads for merging
-    parsedUploads = uploads;
-
-    // Update processed manifest with SHA256 hashes
-    const processedFiles = [];
-    for (const type of ['texts', 'markdown', 'pdfs', 'emails', 'images', 'feishu']) {
-      for (let i = 0; i < uploads[type].length; i++) {
-        const file = uploads[type][i];
-        const fileBuffer = await readFile(file.path);
-        const hash = createHash('sha256').update(fileBuffer).digest('hex');
-        processedFiles.push({
-          filename: file.sourceFile,
-          hash,
-          processedAt: new Date().toISOString()
-        });
+    // Load processed images
+    const imagesPath = path.join(processedDir, 'images');
+    try {
+      const imageFiles = await fs.readdir(imagesPath);
+      for (const file of imageFiles) {
+        if (file.endsWith('.json')) {
+          const content = JSON.parse(await fs.readFile(path.join(imagesPath, file), 'utf8'));
+          parsedUploads.images.push(content);
+        }
       }
-    }
+    } catch {}
 
-    if (processedFiles.length > 0) {
-      await updateProcessedManifest(actualUploadsDir, processedFiles);
-      console.log(`  ✓ Updated processed manifest with ${processedFiles.length} file(s)`);
+    // Load processed Feishu
+    const feishuPath = path.join(processedDir, 'feishu');
+    try {
+      const feishuFiles = await fs.readdir(feishuPath);
+      for (const file of feishuFiles) {
+        if (file.endsWith('.json')) {
+          const content = JSON.parse(await fs.readFile(path.join(feishuPath, file), 'utf8'));
+          parsedUploads.feishu.push(content);
+        }
+      }
+    } catch {}
+
+    const totalUploads = parsedUploads.texts.length + parsedUploads.markdown.length +
+                        parsedUploads.pdfs.length + parsedUploads.emails.length +
+                        parsedUploads.images.length + parsedUploads.feishu.length;
+
+    if (totalUploads > 0) {
+      console.log(`  ✓ Loaded ${totalUploads} processed file(s) from workspace`);
     }
   } catch (error) {
-    console.log(`  ⚠️  Upload scanning failed: ${error.message}`);
+    console.log(`  ⚠️  Failed to load processed content: ${error.message}`);
   }
 
   // Step 1: Collect information
@@ -251,6 +241,10 @@ async function generateMentorSkill(options) {
   if (arxivTool) {
     papers = await arxivTool.searchArxiv(name, arxivLimit);
     console.log(`  ✓ Found ${papers.length} papers on ArXiv`);
+
+    // Save to workspace
+    await saveArxivPapers(name, papers);
+    console.log(`  ✓ Saved papers to workspace`);
   }
 
   // Browser search (especially for Chinese mentors or non-ArXiv fields)
@@ -259,6 +253,10 @@ async function generateMentorSkill(options) {
     const searchResults = await puppeteerTool.searchWithBrowser(query, 5);
     websites = searchResults;
     console.log(`  ✓ Found ${websites.length} websites`);
+
+    // Save to workspace
+    await saveWebResults(name, websites);
+    console.log(`  ✓ Saved web results to workspace`);
   }
 
   // Step 2: Deep analysis (optional)
@@ -774,40 +772,50 @@ async function main() {
   const args = process.argv.slice(2);
 
   if (args.length === 0) {
-    console.log('Usage: node skill-generator.mjs "<name>" [--affiliation "<institution>"] [--deep-analyze] [--uploads "<directory>"]');
+    console.log('Usage: node skill-generator.mjs "<name>" [options]');
     console.log('');
     console.log('Options:');
     console.log('  --affiliation  Specify mentor affiliation');
     console.log('  --deep-analyze Enable deep paper analysis');
-    console.log('  --uploads     Specify custom uploads directory (default: ~/.claude/uploads/{mentor_name}/)');
+    console.log('  --upload       Single file to upload (incremental mode)');
+    console.log('  --incremental  Incremental mode (only process upload, skip skill generation)');
+    console.log('');
+    console.log('Workspace:');
+    console.log('  Each mentor gets an auto-allocated workspace at:');
+    console.log('  ~/.claude/mentors-workspace/{mentor_name}/');
+    console.log('');
+    console.log('  The workspace contains:');
+    console.log('    - uploads/raw/      Original uploaded files');
+    console.log('    - processed/        Parsed and processed content');
+    console.log('    - sources/          ArXiv papers and web search results');
+    console.log('    - analysis/         Analysis results');
+    console.log('    - skill/            Final generated skill');
     console.log('');
     console.log('Examples:');
-    console.log('  # Basic usage (uses mentor-specific uploads)');
+    console.log('  # Basic usage');
     console.log('  node skill-generator.mjs "Geoffrey Hinton" --affiliation "University of Toronto"');
     console.log('');
-    console.log('  # With custom uploads directory');
-    console.log('  node skill-generator.mjs "Geoffrey Hinton" --uploads ./my-uploads/');
+    console.log('  # Upload a single file (incremental)');
+    console.log('  node skill-generator.mjs "Geoffrey Hinton" --upload paper.pdf --incremental');
     console.log('');
-    console.log('  # Upload directory structure:');
-    console.log('  ~/.claude/uploads/Geoffrey_Hinton/');
-    console.log('    ├── text/');
-    console.log('    ├── markdown/');
-    console.log('    ├── pdfs/');
-    console.log('    ├── emails/');
-    console.log('    ├── images/');
-    console.log('    └── feishu/');
+    console.log('  # Upload file and regenerate skill');
+    console.log('  node skill-generator.mjs "Geoffrey Hinton" --upload notes.txt');
+    console.log('');
+    console.log('  # Deep analysis');
+    console.log('  node skill-generator.mjs "Geoffrey Hinton" --deep-analyze');
     process.exit(1);
   }
 
   const name = args[0];
   const affiliationIndex = args.indexOf('--affiliation');
   const affiliation = affiliationIndex !== -1 ? args[affiliationIndex + 1] : '';
-  const uploadsIndex = args.indexOf('--uploads');
-  const uploadsDir = uploadsIndex !== -1 ? args[uploadsIndex + 1] : null;
+  const uploadIndex = args.indexOf('--upload');
+  const upload = uploadIndex !== -1 ? args[uploadIndex + 1] : null;
+  const incremental = args.includes('--incremental');
   const deepAnalyze = args.includes('--deep-analyze');
 
   try {
-    await generateMentorSkill({ name, affiliation, deepAnalyze, uploadsDir });
+    await generateMentorSkill({ name, affiliation, deepAnalyze, upload, incremental });
   } catch (error) {
     console.error(`Error: ${error.message}`);
     process.exit(1);
