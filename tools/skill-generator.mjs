@@ -49,7 +49,8 @@ async function generateMentorSkill(options) {
     affiliation = '',
     deepAnalyze = false,
     arxivLimit = 20,
-    browserSearch = true
+    browserSearch = true,
+    uploadsDir = null  // New: allow custom uploads directory
   } = options;
 
   console.log(`\n🎓 Starting mentor distillation: ${name}`);
@@ -60,13 +61,27 @@ async function generateMentorSkill(options) {
 
   // Step 0: Scan uploads directory
   console.log('Step 0: Scanning uploads directory...');
-  const uploadsDir = path.join(process.env.HOME, '.claude', 'uploads');
+
+  // Determine uploads directory:
+  // 1. Use provided directory if specified
+  // 2. Otherwise, use mentor-specific directory: ~/.claude/uploads/{mentor_name}/
+  let actualUploadsDir;
+  if (uploadsDir) {
+    actualUploadsDir = uploadsDir;
+    console.log(`  Using custom uploads directory: ${uploadsDir}`);
+  } else {
+    // Create mentor-specific directory
+    const mentorSlug = name.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_');
+    actualUploadsDir = path.join(process.env.HOME, '.claude', 'uploads', mentorSlug);
+    console.log(`  Using mentor-specific directory: ~/.claude/uploads/${mentorSlug}/`);
+  }
+
   let uploads = { pdfs: [], emails: [], feishu: [], images: [], markdown: [], texts: [] };
   let parsedUploads = { pdfs: [], emails: [], feishu: [], images: [], markdown: [], texts: [] };
   const processingErrors = [];
 
   try {
-    uploads = await scanUploads(uploadsDir);
+    uploads = await scanUploads(actualUploadsDir);
     const uploadCount = Object.values(uploads).reduce((sum, arr) => sum + arr.length, 0);
     console.log(`  ✓ Found ${uploadCount} new upload(s) to process`);
 
@@ -217,7 +232,7 @@ async function generateMentorSkill(options) {
     }
 
     if (processedFiles.length > 0) {
-      await updateProcessedManifest(uploadsDir, processedFiles);
+      await updateProcessedManifest(actualUploadsDir, processedFiles);
       console.log(`  ✓ Updated processed manifest with ${processedFiles.length} file(s)`);
     }
   } catch (error) {
@@ -759,21 +774,40 @@ async function main() {
   const args = process.argv.slice(2);
 
   if (args.length === 0) {
-    console.log('Usage: node skill-generator.mjs "<name>" [--affiliation "<institution>"] [--deep-analyze]');
+    console.log('Usage: node skill-generator.mjs "<name>" [--affiliation "<institution>"] [--deep-analyze] [--uploads "<directory>"]');
+    console.log('');
+    console.log('Options:');
+    console.log('  --affiliation  Specify mentor affiliation');
+    console.log('  --deep-analyze Enable deep paper analysis');
+    console.log('  --uploads     Specify custom uploads directory (default: ~/.claude/uploads/{mentor_name}/)');
     console.log('');
     console.log('Examples:');
+    console.log('  # Basic usage (uses mentor-specific uploads)');
     console.log('  node skill-generator.mjs "Geoffrey Hinton" --affiliation "University of Toronto"');
-    console.log('  node skill-generator.mjs "Geoffrey Hinton" --deep-analyze');
+    console.log('');
+    console.log('  # With custom uploads directory');
+    console.log('  node skill-generator.mjs "Geoffrey Hinton" --uploads ./my-uploads/');
+    console.log('');
+    console.log('  # Upload directory structure:');
+    console.log('  ~/.claude/uploads/Geoffrey_Hinton/');
+    console.log('    ├── text/');
+    console.log('    ├── markdown/');
+    console.log('    ├── pdfs/');
+    console.log('    ├── emails/');
+    console.log('    ├── images/');
+    console.log('    └── feishu/');
     process.exit(1);
   }
 
   const name = args[0];
   const affiliationIndex = args.indexOf('--affiliation');
   const affiliation = affiliationIndex !== -1 ? args[affiliationIndex + 1] : '';
+  const uploadsIndex = args.indexOf('--uploads');
+  const uploadsDir = uploadsIndex !== -1 ? args[uploadsIndex + 1] : null;
   const deepAnalyze = args.includes('--deep-analyze');
 
   try {
-    await generateMentorSkill({ name, affiliation, deepAnalyze });
+    await generateMentorSkill({ name, affiliation, deepAnalyze, uploadsDir });
   } catch (error) {
     console.error(`Error: ${error.message}`);
     process.exit(1);
