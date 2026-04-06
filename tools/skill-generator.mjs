@@ -60,7 +60,8 @@ async function generateMentorSkill(options) {
     arxivLimit = 20,
     browserSearch = true,
     upload = null,        // Single file to upload
-    incremental = false   // Incremental mode (don't regenerate everything)
+    incremental = false,   // Incremental mode (don't regenerate everything)
+    useArxiv = false      // Use ArXiv search (disabled by default due to author collision issues)
   } = options;
 
   console.log(`\n🎓 Starting mentor distillation: ${name}`);
@@ -237,22 +238,62 @@ async function generateMentorSkill(options) {
   let papers = [];
   let websites = [];
 
-  // ArXiv search
-  if (arxivTool) {
+  // ArXiv search (disabled by default, use --use-arxiv to enable)
+  if (useArxiv && arxivTool) {
     papers = await arxivTool.searchArxiv(name, arxivLimit);
     console.log(`  ✓ Found ${papers.length} papers on ArXiv`);
 
     // Save to workspace
     await saveArxivPapers(name, papers);
     console.log(`  ✓ Saved papers to workspace`);
+  } else {
+    console.log(`  ⏭️  ArXiv search disabled (using Google Search instead)`);
   }
 
-  // Browser search (especially for Chinese mentors or non-ArXiv fields)
+  // Enhanced Google Search for comprehensive information
   if (browserSearch && puppeteerTool) {
-    const query = affiliation ? `${name} ${affiliation}` : name;
-    const searchResults = await puppeteerTool.searchWithBrowser(query, 5);
-    websites = searchResults;
-    console.log(`  ✓ Found ${websites.length} websites`);
+    // Search 1: General search with affiliation
+    let generalQuery = affiliation ? `${name} ${affiliation}` : name;
+    console.log(`  🔍 Searching: "${generalQuery}"`);
+    const generalResults = await puppeteerTool.searchWithBrowser(generalQuery, 5);
+    websites = websites.concat(generalResults);
+    console.log(`  ✓ Found ${generalResults.length} general websites`);
+
+    // Search 2: Wikipedia
+    console.log(`  🔍 Searching: "${name} Wikipedia"`);
+    const wikiQuery = `${name} Wikipedia`;
+    const wikiResults = await puppeteerTool.searchWithBrowser(wikiQuery, 3);
+    websites = websites.concat(wikiResults);
+    console.log(`  ✓ Found ${wikiResults.length} Wikipedia results`);
+
+    // Search 3: Google Scholar
+    console.log(`  🔍 Searching: "${name} Google Scholar"`);
+    const scholarQuery = `${name} site:scholar.google.com`;
+    const scholarResults = await puppeteerTool.searchWithBrowser(scholarQuery, 3);
+    websites = websites.concat(scholarResults);
+    console.log(`  ✓ Found ${scholarResults.length} Google Scholar results`);
+
+    // Search 4: Personal homepage (if affiliation provided)
+    if (affiliation) {
+      console.log(`  🔍 Searching: "${name} ${affiliation} homepage"`);
+      const homepageQuery = `${name} ${affiliation} homepage profile`;
+      const homepageResults = await puppeteerTool.searchWithBrowser(homepageQuery, 3);
+      websites = websites.concat(homepageResults);
+      console.log(`  ✓ Found ${homepageResults.length} homepage results`);
+    }
+
+    // Deduplicate websites by URL
+    const uniqueWebsites = [];
+    const seenUrls = new Set();
+    for (const site of websites) {
+      if (!seenUrls.has(site.url)) {
+        seenUrls.add(site.url);
+        uniqueWebsites.push(site);
+      }
+    }
+    websites = uniqueWebsites;
+
+    console.log(`  ✓ Total unique websites: ${websites.length}`);
 
     // Save to workspace
     await saveWebResults(name, websites);
@@ -779,6 +820,14 @@ async function main() {
     console.log('  --deep-analyze Enable deep paper analysis');
     console.log('  --upload       Single file to upload (incremental mode)');
     console.log('  --incremental  Incremental mode (only process upload, skip skill generation)');
+    console.log('  --use-arxiv   Enable ArXiv search (default: disabled, uses Google Search)');
+    console.log('');
+    console.log('Information Sources (default):');
+    console.log('  ✅ Google Search (general information)');
+    console.log('  ✅ Wikipedia (biography)');
+    console.log('  ✅ Google Scholar (publications)');
+    console.log('  ✅ Personal homepages (profile pages)');
+    console.log('  ⏭️  ArXiv (disabled due to author name collisions)');
     console.log('');
     console.log('Workspace:');
     console.log('  Each mentor gets an auto-allocated workspace at:');
@@ -787,22 +836,25 @@ async function main() {
     console.log('  The workspace contains:');
     console.log('    - uploads/raw/      Original uploaded files');
     console.log('    - processed/        Parsed and processed content');
-    console.log('    - sources/          ArXiv papers and web search results');
+    console.log('    - sources/web/      Web search results (Google, Wikipedia, Scholar)');
+    console.log('    - sources/arxiv/    ArXiv papers (if --use-arxiv enabled)');
     console.log('    - analysis/         Analysis results');
     console.log('    - skill/            Final generated skill');
     console.log('');
     console.log('Examples:');
-    console.log('  # Basic usage');
-    console.log('  node skill-generator.mjs "Geoffrey Hinton" --affiliation "University of Toronto"');
+    console.log('  # Basic usage (Google Search + Wikipedia + Scholar)');
+    console.log('  node skill-generator.mjs "Fei-Fei Li" --affiliation "Stanford University"');
     console.log('');
-    console.log('  # Upload a single file (incremental)');
-    console.log('  node skill-generator.mjs "Geoffrey Hinton" --upload paper.pdf --incremental');
+    console.log('  # With ArXiv search (use with caution for common names)');
+    console.log('  node skill-generator.mjs "Geoffrey Hinton" --use-arxiv');
     console.log('');
-    console.log('  # Upload file and regenerate skill');
-    console.log('  node skill-generator.mjs "Geoffrey Hinton" --upload notes.txt');
+    console.log('  # Upload materials for better accuracy');
+    console.log('  node skill-generator.mjs "Yann LeCun" --upload bio.pdf --incremental');
+    console.log('  node skill-generator.mjs "Yann LeCun" --upload paper.pdf --incremental');
+    console.log('  node skill-generator.mjs "Yann LeCun" --affiliation "NYU"');
     console.log('');
-    console.log('  # Deep analysis');
-    console.log('  node skill-generator.mjs "Geoffrey Hinton" --deep-analyze');
+    console.log('  # Deep analysis with uploaded materials');
+    console.log('  node skill-generator.mjs "Mentor Name" --deep-analyze');
     process.exit(1);
   }
 
@@ -813,6 +865,7 @@ async function main() {
   const upload = uploadIndex !== -1 ? args[uploadIndex + 1] : null;
   const incremental = args.includes('--incremental');
   const deepAnalyze = args.includes('--deep-analyze');
+  const useArxiv = args.includes('--use-arxiv');
 
   try {
     await generateMentorSkill({ name, affiliation, deepAnalyze, upload, incremental });
