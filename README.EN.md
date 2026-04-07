@@ -144,6 +144,123 @@ node tools/skill-generator.mjs "Fei-Fei Li" --affiliation "Stanford University"
 
 ---
 
+## 💻 All Command Interfaces
+
+### 1️⃣ `/distill-mentor` - Generate Mentor Skill
+
+**Purpose**: Generate a digital mentor skill from scratch
+
+**Basic Syntax**:
+```bash
+node tools/skill-generator.mjs "<Mentor Name>" --affiliation "<Institution>"
+```
+
+**Optional Parameters**:
+```bash
+--deep-analyze          # Enable deep paper analysis (requires API)
+--use-arxiv            # Enable ArXiv search (disabled by default)
+--upload <file>         # Upload a single file
+--incremental          # Incremental mode (process upload only)
+```
+
+**Usage Examples**:
+```bash
+# Basic usage
+node tools/skill-generator.mjs "Geoffrey Hinton" --affiliation "University of Toronto"
+
+# With deep analysis
+node tools/skill-generator.mjs "Fei-Fei Li" --affiliation "Stanford University" --deep-analyze
+
+# Upload materials
+node tools/skill-generator.mjs "Yann LeCun" --affiliation "NYU" --upload paper.pdf --incremental
+```
+
+---
+
+### 2️⃣ `/upload` - Upload Materials to Enhance Skills
+
+**Purpose**: Upload papers, interviews, chat screenshots, etc. to automatically analyze and enhance existing mentor skills
+
+**Basic Syntax**:
+```bash
+/upload "<Mentor Name>" <file_path>
+```
+
+**Supported File Types**:
+- 📸 **Images** (.png, .jpg, .jpeg) - Chat screenshots, analyze speaking style
+- 📄 **PDF** (.pdf) - Papers, biographies
+- 📝 **Text** (.txt, .md) - Interviews, notes
+
+**Usage Examples**:
+```bash
+# Upload chat screenshot
+/upload "Fei-Fei Li" wechat-chat.png
+
+# Upload paper
+/upload "Geoffrey Hinton" research-paper.pdf
+
+# Upload interview transcript
+/upload "Yann LeCun" interview-transcript.md
+
+# Regenerate after uploading multiple files
+node tools/skill-generator.mjs "Fei-Fei Li" --affiliation "Stanford University"
+```
+
+**Note**: Automatic deep analysis is performed after upload, no extra parameters needed
+
+---
+
+### 3️⃣ `/bye` - End Mentor Conversation
+
+**Purpose**: Gracefully end current mentor conversation
+
+**Basic Syntax**:
+```bash
+/bye [mentor_name]
+```
+
+**Usage Examples**:
+```bash
+# Generic goodbye
+/bye
+
+# Say goodbye to specific mentor
+/bye GeoffreyHinton
+```
+
+---
+
+### 4️⃣ `/MentorName` - Chat with Mentor
+
+**Purpose**: Converse with generated mentor skills
+
+**Basic Syntax**:
+```bash
+/<MentorName> <your question or request>
+```
+
+**Mentor Naming Rules**:
+- Remove spaces and special characters
+- Examples: "Fei-Fei Li" → `FeiFeiLi`
+- Examples: "Geoffrey Hinton" → `GeoffreyHinton`
+
+**Usage Examples**:
+```bash
+# Paper review
+/GeoffreyHinton Are the innovations in my deep learning paper prominent enough?
+
+# Research direction consultation
+/FeiFeiLi What are the frontier directions in computer vision?
+
+# Research philosophy discussion
+/YannLeCun What's your view on the future of self-supervised learning?
+
+# Ask questions anytime
+/YourName Help me review this experimental design
+```
+
+---
+
 ## 📖 Quick Start
 
 ### ⚠️ Prerequisites

@@ -144,6 +144,123 @@ node tools/skill-generator.mjs "Fei-Fei Li" --affiliation "Stanford University"
 
 ---
 
+## 💻 所有命令接口
+
+### 1️⃣ `/distill-mentor` - 生成导师技能
+
+**用途**: 从零开始生成一个数字导师技能
+
+**基本语法**:
+```bash
+node tools/skill-generator.mjs "<导师名字>" --affiliation "<所属机构>"
+```
+
+**可选参数**:
+```bash
+--deep-analyze          # 启用深度论文分析（需要 API）
+--use-arxiv            # 启用 ArXiv 搜索（默认禁用）
+--upload <文件>         # 上传单个文件
+--incremental          # 增量模式（仅处理上传）
+```
+
+**使用示例**:
+```bash
+# 基础用法
+node tools/skill-generator.mjs "Geoffrey Hinton" --affiliation "University of Toronto"
+
+# 带深度分析
+node tools/skill-generator.mjs "Fei-Fei Li" --affiliation "Stanford University" --deep-analyze
+
+# 上传材料
+node tools/skill-generator.mjs "Yann LeCun" --affiliation "NYU" --upload paper.pdf --incremental
+```
+
+---
+
+### 2️⃣ `/upload` - 上传材料增强技能
+
+**用途**: 上传论文、访谈、聊天截图等材料，自动分析并增强现有导师技能
+
+**基本语法**:
+```bash
+/upload "<导师名字>" <文件路径>
+```
+
+**支持的文件类型**:
+- 📸 **图片** (.png, .jpg, .jpeg) - 聊天截图，分析说话风格
+- 📄 **PDF** (.pdf) - 论文、传记
+- 📝 **文本** (.txt, .md) - 访谈、笔记
+
+**使用示例**:
+```bash
+# 上传聊天截图
+/upload "Fei-Fei Li" wechat-chat.png
+
+# 上传论文
+/upload "Geoffrey Hinton" research-paper.pdf
+
+# 上传访谈记录
+/upload "Yann LeCun" interview-transcript.md
+
+# 上传多个文件后重新生成
+node tools/skill-generator.mjs "Fei-Fei Li" --affiliation "Stanford University"
+```
+
+**注意**: 上传后会自动进行深度分析，无需额外参数
+
+---
+
+### 3️⃣ `/bye` - 结束导师对话
+
+**用途**: 优雅地结束当前导师对话
+
+**基本语法**:
+```bash
+/bye [导师名字]
+```
+
+**使用示例**:
+```bash
+# 通用告别
+/bye
+
+# 向特定导师告别
+/bye GeoffreyHinton
+```
+
+---
+
+### 4️⃣ `/导师名字` - 与导师对话
+
+**用途**: 使用已生成的导师技能进行对话
+
+**基本语法**:
+```bash
+/<导师名字> <你的问题或需求>
+```
+
+**导师命名规则**:
+- 去除空格和特殊字符
+- 例如: "Fei-Fei Li" → `FeiFeiLi`
+- 例如: "Geoffrey Hinton" → `GeoffreyHinton`
+
+**使用示例**:
+```bash
+# 论文审阅
+/GeoffreyHinton 我这篇关于深度学习论文的创新点够不够突出？
+
+# 研究方向咨询
+/FeiFeiLi 计算机视觉领域有哪些前沿方向？
+
+# 研究哲学探讨
+/YannLeCun 你对自监督学习的未来发展有什么看法？
+
+# 随时提问
+/YourName 帮我看看这个实验设计
+```
+
+---
+
 ## 📖 快速开始
 
 ### ⚠️ 前提条件
