@@ -323,6 +323,20 @@ node tools/skill-generator.mjs "Your Name" --affiliation "Your University"
 
 ---
 
+## 📦 Multi-CLI Compatibility & .agents Specification
+
+Supervisor now supports **interactive installation** and the latest **.agents specification**, allowing seamless integration with multiple AI CLIs (e.g., Claude Code, Gemini CLI).
+
+After the execution of `skill-generator.mjs` finishes, you will be prompted to choose your preferred installation method:
+
+1. **Centralized management using the `.agents` specification (Recommended)**:
+   - Skills and profiles will be installed in the `~/.agents` directory, and `~/.agents/.skill-lock.json` will be automatically updated.
+   - You will then be asked which CLIs to link to (e.g., `claude,gemini`). The system will automatically create the necessary symlinks (or fallback to copying files on Windows due to permission limits). This allows you to invoke the exact same AI mentor across different tools.
+2. **Traditional direct installation**:
+   - If selected, the files will be installed directly into the designated CLI workspace (defaulting to `~/.claude`), preserving the legacy user experience.
+
+---
+
 ## 📋 Changelog
 
 ### 2026-04-07 - v1.2.0
