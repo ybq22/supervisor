@@ -554,20 +554,30 @@ async function analyzeResearchStyle(info, fields) {
   };
 }
 
+let globalRl = null;
+
 /**
  * Helper to prompt user for input
  */
 function promptUser(question) {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-  });
+  if (!globalRl) {
+    globalRl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
+  }
   return new Promise(resolve => {
-    rl.question(question, answer => {
-      rl.close();
+    globalRl.question(question, answer => {
       resolve(answer.trim());
     });
   });
+}
+
+function closePrompt() {
+  if (globalRl) {
+    globalRl.close();
+    globalRl = null;
+  }
 }
 
 /**
@@ -689,6 +699,7 @@ async function generateSkill(profile) {
     }
   }
 
+  closePrompt();
   return { primaryMentorsDir, primarySkillsDir, mentorName, mentorSlug, linkedPaths };
 }
 
