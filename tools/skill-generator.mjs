@@ -11,7 +11,7 @@
 
 import fs from 'fs/promises';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 import { readFile } from 'fs/promises';
 import { createHash } from 'crypto';
 import {
@@ -36,8 +36,10 @@ const __dirname = path.dirname(__filename);
 
 async function loadTool(toolName) {
   const toolPath = path.join(__dirname, `${toolName}.mjs`);
+  // ESM import() requires file:// URLs for absolute paths on Windows (C:\... is not valid)
+  const toolUrl = pathToFileURL(toolPath);
   try {
-    const module = await import(toolPath);
+    const module = await import(toolUrl.href);
     return module;
   } catch (error) {
     console.error(`Failed to load tool ${toolName}: ${error.message}`);
