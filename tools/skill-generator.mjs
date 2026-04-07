@@ -14,6 +14,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { readFile } from 'fs/promises';
 import { createHash } from 'crypto';
+import readline from 'readline';
 import {
   createWorkspace,
   getWorkspacePath,
@@ -358,10 +359,10 @@ async function generateMentorSkill(options) {
 
   // Step 4: Generate skill
   console.log('\nStep 4: Generating mentor skill...');
-  await generateSkill(profile);
+  const paths = await generateSkill(profile);
 
   console.log('\n✅ Mentor skill generated successfully!\n');
-  printSummary(profile);
+  printSummary(profile, paths);
 }
 
 /**
@@ -553,37 +554,153 @@ async function analyzeResearchStyle(info, fields) {
   };
 }
 
+let globalRl = null;
+
+/**
+ * Helper to prompt user for input
+ */
+function promptUser(question) {
+  if (!globalRl) {
+    globalRl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
+  }
+  return new Promise(resolve => {
+    globalRl.question(question, answer => {
+      resolve(answer.trim());
+    });
+  });
+}
+
+function closePrompt() {
+  if (globalRl) {
+    globalRl.close();
+    globalRl = null;
+  }
+}
+
 /**
  * Generate mentor skill file
  */
 async function generateSkill(profile) {
-  const mentorsDir = path.join(process.env.HOME, '.claude', 'mentors');
-  const skillsDir = path.join(process.env.HOME, '.claude', 'skills');
+  // Ask user for installation method
+  console.log('\n📦 Installation Options:');
+  console.log('  1. Install using .agents specification (Recommended for multi-CLI compatibility)');
+  console.log('  2. Install directly to a specific CLI (e.g., .claude)');
+  const installChoice = await promptUser('Choose installation method [1]: ');
+  const useAgents = installChoice !== '2';
 
-  // Create directories
-  await fs.mkdir(mentorsDir, { recursive: true });
-  await fs.mkdir(skillsDir, { recursive: true });
+  let primaryMentorsDir, primarySkillsDir;
+  const homeDir = process.env.HOME || process.env.USERPROFILE;
+  
+  let targetClis = [];
+
+  if (useAgents) {
+    primaryMentorsDir = path.join(homeDir, '.agents', 'mentors');
+    primarySkillsDir = path.join(homeDir, '.agents', 'skills');
+    
+    console.log('\n🔗 Which CLIs would you like to link this skill to?');
+    console.log('  Enter comma-separated list (e.g. claude,gemini,cursor) or leave empty for none.');
+    const cliChoice = await promptUser('CLIs to link [claude]: ');
+    const inputClis = cliChoice ? cliChoice.split(',').map(c => c.trim()).filter(Boolean) : ['claude'];
+    targetClis = inputClis;
+  } else {
+    const cliChoice = await promptUser('Enter target CLI name (e.g. claude, gemini) [claude]: ');
+    const cliName = cliChoice || 'claude';
+    primaryMentorsDir = path.join(homeDir, `.${cliName}`, 'mentors');
+    primarySkillsDir = path.join(homeDir, `.${cliName}`, 'skills');
+  }
+
+  // Create primary directories
+  await fs.mkdir(primaryMentorsDir, { recursive: true });
+  await fs.mkdir(primarySkillsDir, { recursive: true });
 
   // Generate slug without spaces for files and skill name
   const mentorSlug = profile.meta.mentor_name
     .replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '')  // Remove special chars
-    .replace(/\s+/g, '');                      // Remove spaces
+    .replace(/\\s+/g, '');                      // Remove spaces
   const mentorName = profile.meta.mentor_name.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_');
 
-  // Save profile JSON (uses readable name with underscores)
-  const profilePath = path.join(mentorsDir, `${mentorName}.json`);
+  // Save profile JSON
+  const profilePath = path.join(primaryMentorsDir, `${mentorName}.json`);
   await fs.writeFile(profilePath, JSON.stringify(profile, null, 2), 'utf8');
   console.log(`  ✓ Profile saved: ${profilePath}`);
 
-  // Generate and save SKILL.md (uses slug without spaces)
+  // Generate and save SKILL.md
   const skillContent = generateSkillContent(profile, mentorSlug);
-  const skillDir = path.join(skillsDir, mentorSlug);
+  const skillDir = path.join(primarySkillsDir, mentorSlug);
   await fs.mkdir(skillDir, { recursive: true });
   const skillPath = path.join(skillDir, 'SKILL.md');
   await fs.writeFile(skillPath, skillContent, 'utf8');
   console.log(`  ✓ Skill saved: ${skillPath}`);
 
-  console.log(`\n  🚀 Usage: /${mentorSlug} <question>\n`);
+  // Handle symlinks for .agents installation
+  const linkedPaths = [];
+  if (useAgents && targetClis.length > 0) {
+    console.log('\\n🔗 Creating compatibility links...');
+    
+    for (const cli of targetClis) {
+      const cliMentorsDir = path.join(homeDir, `.${cli}`, 'mentors');
+      const cliSkillsDir = path.join(homeDir, `.${cli}`, 'skills');
+      
+      await fs.mkdir(cliMentorsDir, { recursive: true });
+      await fs.mkdir(cliSkillsDir, { recursive: true });
+      
+      const cliProfilePath = path.join(cliMentorsDir, `${mentorName}.json`);
+      const cliSkillDir = path.join(cliSkillsDir, mentorSlug);
+      
+      try {
+        // Link profile
+        const relativeProfileTarget = path.relative(cliMentorsDir, profilePath);
+        await fs.rm(cliProfilePath, { force: true });
+        await fs.symlink(relativeProfileTarget, cliProfilePath);
+        
+        // Link skill dir
+        const relativeSkillTarget = path.relative(path.dirname(cliSkillDir), skillDir);
+        await fs.rm(cliSkillDir, { recursive: true, force: true });
+        await fs.symlink(relativeSkillTarget, cliSkillDir);
+        
+        console.log(`  ✓ Linked to .${cli}`);
+        linkedPaths.push({ cli, profilePath: cliProfilePath, skillDir: cliSkillDir });
+      } catch (error) {
+        if (process.platform === 'win32') {
+          // Fallback to copy for Windows
+          await fs.copyFile(profilePath, cliProfilePath);
+          await fs.cp(skillDir, cliSkillDir, { recursive: true });
+          console.log(`  ✓ Copied to .${cli} (Windows fallback)`);
+          linkedPaths.push({ cli, profilePath: cliProfilePath, skillDir: cliSkillDir });
+        } else {
+          console.error(`  ❌ Failed to link to .${cli}: ${error.message}`);
+        }
+      }
+    }
+
+    // Update .agents lock file if using .agents
+    try {
+      const lockPath = path.join(homeDir, '.agents', '.skill-lock.json');
+      let lockData = {};
+      try {
+        const data = await fs.readFile(lockPath, 'utf8');
+        lockData = JSON.parse(data);
+      } catch (e) {
+        // Ignore read errors, start fresh
+      }
+      if (!lockData.skills) lockData.skills = {};
+      lockData.skills[mentorSlug] = {
+        name: mentorSlug,
+        path: skillDir,
+        description: `AI mentor emulating ${profile.profile.name_zh}`
+      };
+      await fs.writeFile(lockPath, JSON.stringify(lockData, null, 2), 'utf8');
+      console.log(`  ✓ Updated .skill-lock.json`);
+    } catch (e) {
+      console.log(`  ⚠️ Failed to update .skill-lock.json: ${e.message}`);
+    }
+  }
+
+  closePrompt();
+  return { primaryMentorsDir, primarySkillsDir, mentorName, mentorSlug, linkedPaths };
 }
 
 /**
@@ -781,7 +898,7 @@ function extractCitations(websites) {
   return 'N/A';
 }
 
-function printSummary(profile) {
+function printSummary(profile, paths) {
   const { profile: p, research: r } = profile;
 
   console.log('📋 Mentor Profile Summary:');
@@ -798,10 +915,18 @@ function printSummary(profile) {
   console.log(`  Key Publications: ${r.key_publications.length} papers`);
   console.log('');
   console.log('📁 Files:');
-  console.log(`  Profile: ~/.claude/mentors/${p.name_zh}.json`);
-  console.log(`  Skill:   ~/.claude/skills/${p.name_zh}/SKILL.md`);
+  console.log(`  Profile: ${path.join(paths.primaryMentorsDir, paths.mentorName + '.json')}`);
+  console.log(`  Skill:   ${path.join(paths.primarySkillsDir, paths.mentorSlug, 'SKILL.md')}`);
+  
+  if (paths.linkedPaths && paths.linkedPaths.length > 0) {
+    console.log('\\n🔗 Linked CLIs:');
+    paths.linkedPaths.forEach(link => {
+      console.log(`  .${link.cli} -> Active`);
+    });
+  }
+  
   console.log('');
-  console.log(`🚀 Usage: /${p.name_zh} <question>`);
+  console.log(`🚀 Usage: /${paths.mentorSlug} <question>`);
   console.log('');
 }
 

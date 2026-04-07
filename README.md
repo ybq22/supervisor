@@ -323,6 +323,38 @@ node tools/skill-generator.mjs "Your Name" --affiliation "Your University"
 
 ---
 
+## 📦 支持多 CLI 与 .agents 规范
+
+Supervisor 现已支持**交互式安装**和最新的 **.agents 规范**，可无缝支持多个 AI CLI（如 Claude Code, Gemini CLI 等）。
+
+在执行 `skill-generator.mjs` 结束后，系统会询问您期望的安装方式：
+
+1. **使用 `.agents` 规范集中管理（推荐）**：
+   - 技能和档案会被安装到 `~/.agents` 目录下，并自动更新 `~/.agents/.skill-lock.json`。
+   - 随后会询问您想要兼容的 CLI（如 `claude,gemini`），并自动为您创建所需的软链接（Windows 系统下由于权限原因会自动降级为复制）。这样您就能在不同的工具中调用同一个导师分身。
+2. **传统直接安装**：
+   - 如果选择此项，会直接将文件安装在指定的 CLI 工作区（默认 `~/.claude`），保留原有的使用体验。
+
+### 流程图 (Installation Flowchart)
+
+```mermaid
+graph TD
+    A[执行 skill-generator.mjs] --> B{选择安装方式}
+    B -->|选项 1: .agents 规范| C[安装至 ~/.agents 目录]
+    C --> D[更新 .skill-lock.json]
+    D --> E{需要兼容哪些 CLI?}
+    E -->|输入 claude,gemini| F[自动创建软链接到各 CLI 目录]
+    B -->|选项 2: 传统安装| G{输入目标 CLI}
+    G -->|默认 claude| H[直接安装至 ~/.claude]
+```
+
+### 故障排查 (Troubleshooting)
+
+- **Windows 软链接失败**：在 Windows 系统上创建软链接通常需要管理员权限。如果权限不足，程序会自动降级（Fallback）采用**复制文件**的方式完成安装，不影响正常使用。
+- **.skill-lock.json 更新失败**：如果 `~/.agents` 目录权限异常导致锁定文件更新失败，程序会输出警告并继续运行。您仍可在对应的 CLI 中正常使用该技能。
+
+---
+
 ## 📋 更新日志
 
 ### 2026-04-07 - v1.2.0
