@@ -335,6 +335,24 @@ After the execution of `skill-generator.mjs` finishes, you will be prompted to c
 2. **Traditional direct installation**:
    - If selected, the files will be installed directly into the designated CLI workspace (defaulting to `~/.claude`), preserving the legacy user experience.
 
+### Installation Flowchart
+
+```mermaid
+graph TD
+    A[Run skill-generator.mjs] --> B{Choose Installation Method}
+    B -->|Option 1: .agents Spec| C[Install to ~/.agents]
+    C --> D[Update .skill-lock.json]
+    D --> E{Link to which CLIs?}
+    E -->|e.g., claude,gemini| F[Auto-create symlinks to CLI dirs]
+    B -->|Option 2: Direct Install| G{Target CLI name}
+    G -->|e.g., claude| H[Install directly to ~/.claude]
+```
+
+### Troubleshooting
+
+- **Windows Symlink Failure**: Creating symlinks on Windows usually requires Administrator privileges. If permissions are insufficient, the program will automatically fallback to **copying files**, ensuring your installation completes without issues.
+- **.skill-lock.json Update Failure**: If permissions prevent updating the lock file in `~/.agents`, a warning will be displayed, but the skill will still be installed and functional in the target CLIs.
+
 ---
 
 ## 📋 Changelog
