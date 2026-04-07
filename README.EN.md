@@ -2,7 +2,7 @@
 
 # 🧪 Mentor.skill
 
-### ✨ Distill Academic Mentors into Conversational AI Skills
+### ✨ Distill Mentors into AI Skills You Can Query Anytime
 
 *AI-powered mentor distillation for students and educators*
 
@@ -14,42 +14,44 @@
 [![GitHub Issues](https://img.shields.io/github/issues/ybq22/supervisor)](https://github.com/ybq22/supervisor/issues)
 [![GitHub Contributors](https://img.shields.io/github/contributors/ybq22/supervisor)](https://github.com/ybq22/supervisor/graphs/contributors)
 
+English | [简体中文](./README.md)
+
 ---
 
 </div>
 
-## 💭 Facing Challenges?
+## 💭 Common Pain Points?
 
-### 📅 Mentor too busy to meet? (If you're a student)
-- "Professor, what do you think of this idea?" → **Reply 3 days later**
+### 📅 Mentor Too Busy to Connect? (If You're a Student)
+- "Professor, what do you think of this idea?" → **Replies in 3 days**
 - "Professor, how can I improve this paper?" → **Let's discuss next week**
 - "Professor, is this direction promising?" → **Go research it first**
 
-### 👨‍🏫 Want students to quickly understand your research philosophy? (If you're a teacher)
-- "Have to repeat your research direction every year?" → **Too inefficient**
+### 👨‍🏫 Want Students to Quickly Understand Your Research Philosophy? (If You're a Professor)
+- "Repeating your research direction every year?" → **Too inefficient**
 - "Students don't understand your academic style?" → **High communication cost**
-- "Want more people to benefit from your research experience?" → **Limited influence**
+- "Want more people to benefit from your research experience?" → **Limited impact**
 
-### 🎯 Want instant, professional academic guidance?
-**Why not distill the mentor you want to learn from (or yourself) into a skill!**
+### 🎯 Want Instant, Professional Academic Guidance?
+**Why not distill your desired mentor/yourself into a skill first!**
 
 ---
 
 ## 🚀 Generate Digital Mentor in One Click
 
 ```bash
-# 👨‍🎓 As a student: Generate your desired mentor's skill
-/distill-mentor Geoffrey Hinton --affiliation "University of Toronto"
+# 👨‍🎓 As a student: Generate a skill for an admired mentor
+node tools/skill-generator.mjs "Geoffrey Hinton" --affiliation "University of Toronto"
 
-# 👨‍🏫 As a teacher: Generate your own skill to share with students
-/distill-mentor "Your Name" --affiliation "Your University"
+# 👨‍🏫 As a professor: Generate your own skill to share with students
+node tools/skill-generator.mjs "Your Name" --affiliation "Your University"
 
-# Then start chatting anytime!
-/mentor-skill your question or request
+# Then start conversing!
+/GeoffreyHinton Your questions or needs
 ```
 
-**✨ Students:** Get instant access to mentor guidance anytime!
-**✨ Teachers:** Share your research philosophy and reach more students!
+**✨ Students:** It's like having your mentor by your side, ready to help anytime!
+**✨ Professors:** Let your research philosophy reach more students and amplify your impact!
 
 ---
 
@@ -59,52 +61,86 @@
 
 | Feature | Description |
 |---------|-------------|
-| 🔍 **Smart Search** | **Browser search** comprehensively collects mentor info: papers, homepage, talks, interviews |
+| 🔍 **Smart Search** | **Google Search** comprehensively collects mentor info: institutional pages, Wikipedia, Google Scholar, personal homepages |
 | 🧠 **Style Learning** | AI analyzes mentor's research style, expression habits, and academic viewpoints |
-| 🔬 **Deep Paper Analysis** 🆕 | Extract research interests, methodology preferences, writing style, visualization features |
-| 🌐 **Public Info Analysis** 🆕 | Analyze personality, communication style, academic philosophy from news, interviews, social media |
-| 📊 **Comprehensive Profile** 🆕 | Integrate papers and public info to generate complete digital mentor profile |
-| 💾 **Anytime Access** | Generate structured JSON profile, updatable anytime |
-| 🤖 **Instant Conversation** | Auto-create directly conversational Claude Code skill |
-| 🌍 **Barrier-Free** | Support Chinese and English mentors |
+| 🔬 **Deep Paper Analysis** | Extracts research themes, methodology preferences, writing style, visualization features from papers |
+| 🌐 **Public Info Analysis** | Analyzes personality, communication style, academic philosophy from news, interviews, social media |
+| 📊 **Comprehensive Profile** | Integrates papers and public info to generate a complete digital portrait of mentor |
+| 📸 **Chat Screenshot Analysis** 🆕 | Learn mentor's authentic speaking style and language habits from chat screenshots |
+| 📤 **Smart Upload** 🆕 | Upload materials for automatic deep analysis, no extra steps needed |
+| 💾 **Access Anytime** | Generate structured JSON profiles, update anytime |
+| 🤖 **Instant Conversation** | Automatically creates Claude Code skills ready for dialogue |
+| 🌍 **Barrier-Free Communication** | Supports Chinese and English mentors seamlessly |
 
-### 👨‍🏫 Value for Teachers
+### 👨‍🏫 Value for Professors
 
 | Feature | Description |
 |---------|-------------|
 | 📣 **Philosophy Dissemination** | Systematically organize your research philosophy for quick student understanding |
-| ⏱️ **Improve Efficiency** | Reduce repetitive Q&A, focus on deep conversations |
+| ⏱️ **Improve Efficiency** | Reduce repetitive Q&A, focus on deep discussions |
 | 🎯 **Style Consistency** | Unified academic style and expression |
-| 📚 **Knowledge Preservation** | Permanently preserve and pass on research experience |
-| 🌐 **Expand Influence** | Let more students benefit from your research experience |
+| 📚 **Knowledge Preservation** | Permanently preserve and pass down research experience |
+| 🌐 **Amplify Impact** | Let more students benefit from your research experience |
 | 🔄 **Continuous Updates** | Update your latest research findings anytime |
 
-### ⚙️ Technical Features
+---
 
-| Feature | Description |
-|---------|-------------|
-| 📊 **Quality Assessment** | Auto-evaluate data quality and provide improvement suggestions |
-| ⚡ **Fast Mode** | Optional ArXiv + API only for faster generation |
+## 🔥 New Features
 
-### 🔬 Deep Analysis Features
+### 📸 Chat Screenshot Analysis
 
-**Deep Paper Analysis**:
-- 🎯 Research interest map - Core themes, evolution trends, emerging directions
-- 🔬 Research question preferences - Theory vs practice, basic vs applied, groundbreaking vs incremental
-- 📊 Methodology features - Experimental design, dataset selection, evaluation metrics
-- 📈 Visualization style - Chart types, presentation methods, result display
-- ✍️ Writing style - Title patterns, abstract structure, text features
-- 🧠 Research approach - Innovation sources, problem-solving paths
-- ⚖️ Academic values - Simplicity, practicality, rigor, openness
+**NEW**: Upload chat screenshots to learn mentor's authentic speaking style!
 
-**Public Information Analysis**:
-- 😊 Personality traits - Openness, conscientiousness, extraversion, agreeableness
-- 💼 Work style - Pace, priorities, decision-making
-- 🗣️ Communication style - Presentations, non-academic writing, expression habits
-- 🎓 Academic philosophy - Research philosophy, teaching philosophy
-- 🤝 Social interaction - Collaboration style, mentor-student relations, community involvement
-- 💡 Values - Professional values, social ethics views
-- 🌟 Personal interests - Non-academic interests, work-life balance
+```bash
+/upload "Mentor Name" chat-screenshot.png
+```
+
+**Features**:
+- ✅ Automatically detects chat screenshots (WeChat, WhatsApp, Telegram, etc.)
+- ✅ Intelligently identifies mentor position (usually on the left)
+- ✅ Extracts all mentor messages
+- ✅ Analyzes speaking style: tone, directness, politeness, emoji usage
+- ✅ Extracts common phrases and expressions
+- ✅ Learns personalized language characteristics
+
+### 📤 Automatic Deep Analysis
+
+**NEW**: Upload materials for automatic deep analysis, no manual steps needed
+
+```bash
+# Supported file types
+/upload "Mentor Name" bio.pdf          # Paper analysis
+/upload "Mentor Name" interview.md      # Interview analysis
+/upload "Mentor Name" chat.png          # Chat screenshot analysis
+
+# Regenerate skill to integrate all analyses
+node tools/skill-generator.mjs "Mentor Name" --affiliation "Institution"
+```
+
+---
+
+## 📤 Upload Materials
+
+Enhance mentor skills through multiple channels:
+
+**Supported File Types**:
+- **📸 Images** (.png, .jpg, .jpeg, .gif, .webp) - Chat screenshots, photos (analyzes speaking style)
+- **📄 PDF** (.pdf) - Research papers, biographies, documents
+- **📝 Text** (.txt, .text) - Interview transcripts, notes, correspondence
+- **📑 Markdown** (.md) - Notes, documentation, structured text
+- **📧 Email** (.eml, .mbox) - Correspondence, email threads
+- **📊 Data** (.json) - Feishu exports, structured data
+
+**Quick Example**:
+```bash
+# Upload multiple files (auto-analyzed)
+/upload "Fei-Fei Li" bio.pdf
+/upload "Fei-Fei Li" interview.md
+/upload "Fei-Fei Li" wechat-chat.png
+
+# Regenerate skill
+node tools/skill-generator.mjs "Fei-Fei Li" --affiliation "Stanford University"
+```
 
 ---
 
@@ -112,85 +148,146 @@
 
 ### ⚠️ Prerequisites
 
-**Claude Code CLI Required** - The skills generated by this tool require Claude Code to run
+**Claude Code CLI required** - Generated skills work within Claude Code
 
-- 📖 Installation guide: [Claude Code Official Documentation](https://code.claude.com/docs/en/overview)
+- 📖 Installation guide: [Claude Code Official Docs](https://code.claude.com/docs/en/overview)
 - 💻 Claude Code is Anthropic's official AI-assisted programming tool
 
-Once installed, proceed with the following steps:
+After installing Claude Code, continue below:
 
-### 1️⃣ Install
+### 1️⃣ Installation
 
 ```bash
 # Clone repository
 git clone https://github.com/ybq22/supervisor.git
 cd supervisor
 
-# Ensure Node.js version >= 18
-node --version  # Should show v18.0.0 or higher
+# Install dependencies
+npm install
+
+# Configure API (optional, for deep analysis)
+cp .env.example .env
+# Edit .env file and add your API Key
 ```
 
-### 2️⃣ Generate Your First Digital Mentor
+### 2️⃣ Configure API (Optional)
+
+For deep analysis and chat screenshot features, configure LLM API:
 
 ```bash
-# 👨‍🎓 Student: Generate your desired mentor's skill
-/distill-mentor "Geoffrey Hinton" --affiliation "University of Toronto"
-
-# 👨‍🏫 Teacher: Generate your own skill
-/distill-mentor "Your Name" --affiliation "Your University"
+# Edit .env file
+LLM_API=openai                                    # or anthropic
+OPENAI_API_KEY=sk-xxx                            # Your API Key
+OPENAI_BASE_URL=https://api.openai.com/v1        # API endpoint
+OPENAI_MODEL=gpt-4o                              # Model name
 ```
 
-### 3️⃣ Start Chatting!
+For detailed configuration, see: [API Configuration Guide](API_CONFIGURATION.md)
+
+### 3️⃣ Generate Your First Digital Mentor
+
+```bash
+# 👨‍🎓 As a student: Generate a skill for an admired mentor
+node tools/skill-generator.mjs "Geoffrey Hinton" --affiliation "University of Toronto"
+
+# 👨‍🏫 As a professor: Generate your own skill
+node tools/skill-generator.mjs "Your Name" --affiliation "Your University"
+```
+
+### 4️⃣ Start Conversing!
 
 ```bash
 # 👨‍🎓 Student: Ask questions anytime
-/geoffrey-hinton Are the innovations in my paper significant enough?
+/GeoffreyHinton Are the innovations in my paper prominent enough?
 
-# 👨‍🏫 Teacher: Let students quickly understand your research
-/your-name What is your research philosophy?
+# 👨‍🏫 Professor: Let students quickly understand your research
+/YourName What is your research philosophy?
 ```
 
 ---
 
-## 🎬 Live Demos
+## 📋 Changelog
+
+### 2026-04-07 - v1.2.0
+
+**New Features** ✨:
+- 📸 **Chat Screenshot Analysis**: Automatically recognize chat records and learn mentor's speaking style
+- 📤 **Automatic Deep Analysis**: Upload materials for automatic deep analysis without manual steps
+- 🔍 **Improved Search**: Default to Google Search instead of ArXiv, avoiding same-name author issues
+
+**Improvements** 🚀:
+- ✅ Fixed workspace path handling
+- ✅ Optimized file upload and parsing flow
+- ✅ Enhanced analysis result storage structure
+
+**Documentation** 📚:
+- Added chat screenshot analysis documentation
+- Updated API configuration guide
+- Added changelog section
+
+### 2026-04-06 - v1.1.0
+
+**New Features** ✨:
+- 🧠 **Deep Paper Analysis**: Extract research themes, methodology, writing style
+- 🌐 **Public Info Analysis**: Analyze personality, communication style, academic philosophy
+- 📤 **Multi-Channel Upload**: Support PDF, TXT, MD, images, emails, and more
+- 📊 **Quality Assessment**: Automatically assess data quality and provide improvement suggestions
+
+**Improvements** 🚀:
+- ✅ Support both OpenAI and Anthropic APIs
+- ✅ Added .env configuration file support
+- ✅ Optimized search strategy to avoid ArXiv same-name author issues
+
+### 2026-04-05 - v1.0.0
+
+**Initial Release** 🎉:
+- ✨ Core mentor skill generation
+- 🔍 ArXiv paper search
+- 🌐 Google browser search
+- 🤖 Claude Code skill generation
+- 📚 Basic documentation and examples
+
+---
+
+## 🎬 Real-World Examples
 
 ### 👨‍🎓 Student Use Cases
 
 #### 📝 Paper Review
 
 ```bash
-/geoffrey-hinton Are the innovations in my deep learning paper significant enough?
+/GeoffreyHinton Are the innovations in my deep learning paper prominent enough?
 ```
 
-**Digital mentor will:**
-1. Summarize core contributions
+**Digital Mentor Will:**
+1. Summarize paper's core contributions
 2. Highlight strengths and weaknesses
 3. Provide specific improvement suggestions
-4. Maintain the mentor's unique expression style
+4. Maintain mentor's unique expression style
 
-#### 🔬 Research Direction Consultation
+### 🔬 Research Direction Consultation
 
 ```bash
-/geoffrey-hinton What are the frontier directions in neural network architecture design?
+/GeoffreyHinton What are the frontier directions in neural network architecture design?
 ```
 
-**Digital mentor will:**
+**Digital Mentor Will:**
 1. Answer based on real research
-2. Provide relevant paper suggestions
+2. Suggest relevant papers
 3. Assess research feasibility
-4. Clearly state uncertainties
+4. Clearly indicate uncertainties
 
 ---
 
-### 👨‍🏫 Teacher Use Cases
+### 👨‍🏫 Professor Use Cases
 
 #### 💡 Share Research Philosophy
 
 ```bash
-/my-skill I want students to quickly understand my research philosophy and core views
+/YourName I want students to quickly understand my research philosophy and core views
 ```
 
-**Digital mentor will:**
+**Digital Mentor Will:**
 1. Systematically organize your research philosophy
 2. Explain complex concepts in student-friendly language
 3. Provide learning paths and resource recommendations
@@ -199,13 +296,13 @@ node --version  # Should show v18.0.0 or higher
 #### 📚 Improve Communication Efficiency
 
 ```bash
-/my-skill Help me answer common questions about my research methodology
+/YourName Help me answer common questions about my research methodology
 ```
 
-**Digital mentor will:**
+**Digital Mentor Will:**
 1. Summarize your methodology characteristics
 2. Provide standardized Q&A
-3. Maintain consistent research style
+3. Maintain consistency in research style
 4. Save time on repetitive communication
 
 ---
@@ -213,146 +310,80 @@ node --version  # Should show v18.0.0 or higher
 ## 📁 Project Structure
 
 ```
-distill-mentor/
-├── SKILL.md                   # AgentSkills entry file
-├── prompts/                   # Prompt templates
-│   ├── intake.md             # Information collection workflow
-│   ├── analyzer.md           # Profile analysis prompt
-│   ├── style-analyzer.md     # Style analysis prompt
-│   └── builder.md            # Skill generation prompt
-├── tools/                     # Implementation tools
-│   ├── arxiv-search.mjs      # ArXiv API search
-│   ├── puppeteer-search.mjs  # Browser search
+supervisor/
+├── tools/                     # Core tools
+│   ├── skill-generator.mjs   # Main generator
+│   ├── arxiv-search.mjs      # ArXiv search (optional)
+│   ├── puppeteer-search.mjs  # Google browser search
 │   ├── paper-analysis.mjs    # Deep paper analysis
-│   └── skill-generator.mjs   # Main generator
-├── mentors/                   # Generated profiles (gitignored)
+│   ├── content-analyzer.mjs  # Content analysis (LLM API)
+│   ├── chat-screenshot-analyzer.mjs  # Chat screenshot analysis
+│   ├── workspace-manager.mjs # Workspace management
+│   ├── parsers/              # File parsers
+│   │   ├── pdf.mjs
+│   │   ├── text.mjs
+│   │   └── markdown.mjs
+│   └── upload-scanner.mjs    # Upload file scanner
 ├── docs/                      # Documentation
-├── examples/                  # Usage examples
-└── tests/                     # Test files
+│   ├── QUICKSTART.md         # Quick start guide
+│   ├── API_CONFIGURATION.md  # API configuration guide
+│   └── API_QUICK_REFERENCE.md # API quick reference
+├── .env.example              # Configuration example
+├── package.json              # Dependencies
+├── diagnose-api.sh           # API diagnostic tool
+└── README.md                 # This file
 ```
+
+---
 
 ## 🏗️ How It Works
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                  🎯 Mentor Distillation Workflow                  │
+│              🎯 Mentor Distillation Workflow                       │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  1️⃣ Input mentor name + affiliation                              │
 │           ↓                                                     │
-│  2️⃣ 🔍 Multi-source search                                      │
-│     ├─ ArXiv paper search                                       │
-│     ├─ Browser search x4                                        │
-│     │  ├─ Personal homepage                                     │
-│     │  ├─ Papers/publications                                   │
-│     │  ├─ Talks/interviews                                      │
-│     │  └─ Wikipedia                                            │
+│  2️⃣ 🔍 Multi-source Search (Google Search Priority)              │
+│     ├─ Institutional page + name                                  │
+│     ├─ Wikipedia                                                 │
+│     ├─ Google Scholar                                            │
+│     └─ Personal homepage                                         │
 │           ↓                                                     │
-│  3️⃣ 🧠 AI Deep Analysis                                         │
-│     ├─ 🔬 Paper analysis (research interests, methodology, style)│
-│     ├─ 🌐 Public info analysis (personality, communication)      │
-│     └─ 📊 Comprehensive profile generation                      │
+│  3️⃣ 📤 Upload Materials (Optional)                               │
+│     ├─ 📸 Chat screenshot → Analyze speaking style                │
+│     ├─ 📄 PDF paper → Analyze research style                     │
+│     ├─ 📝 Interview text → Analyze communication style           │
+│     └─ Automatic deep analysis 🆕                                │
 │           ↓                                                     │
-│  4️⃣ 💾 Persistent Storage                                       │
-│     └─ Generate structured JSON profile                        │
+│  4️⃣ 🧠 AI Deep Analysis                                          │
+│     ├─ 🔬 Paper analysis (themes, methodology, writing style)      │
+│     ├─ 🌐 Public info analysis (personality, communication, philosophy) │
+│     ├─ 📸 Chat style analysis (tone, word choice, expression) 🆕   │
+│     └─ 📊 Comprehensive profile generation                       │
 │           ↓                                                     │
-│  5️⃣ 🤖 Auto-Create Skill                                       │
-│     └─ Generate directly conversational Claude Code skill       │
+│  5️⃣ 💾 Persistent Storage                                        │
+│     └─ Generate structured JSON profile + analysis results       │
 │           ↓                                                     │
-│  6️⃣ 💬 Start Chatting!                                         │
-│     ├─ Students: Ask questions, paper reviews, research advice  │
-│     └─ Teachers: Share philosophy, expand influence, improve efficiency│
+│  6️⃣ 🤖 Auto-Create Skill                                        │
+│     └─ Generate ready-to-use Claude Code skill                   │
+│           ↓                                                     │
+│  7️⃣ 💬 Start Conversing!                                        │
+│     ├─ Students: Ask questions, paper reviews, research consultation │
+│     └─ Professors: Share philosophy, amplify impact, improve efficiency │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### 📂 Output Files
-
-```
-~/.claude/
-├── mentors/
-│   └── {mentor_name}.json          # Structured profile
-└── skills/
-    └── {mentor_name}/
-        └── SKILL.md                # Claude Code skill
-```
-
 ---
 
-## 📚 Example Mentors
-
-### 👨‍🎓 Role Models
-
-| Mentor | Institution | Research Field |
-|--------|-------------|----------------|
-| Geoffrey Hinton | University of Toronto | Deep Learning, Neural Networks, Cognitive Science |
-| *[Your desired mentor]* | *[Their institution]* | *[Their field]* |
-
-### 👨‍🏫 Teacher Cases
-
-Create your own digital twin to let students understand your research philosophy anytime:
-
-| Mentor | Institution | Research Field |
-|--------|-------------|----------------|
-| *[Your Name]* | *[Your University]* | *[Your Research Field]* |
-| *[Collaborator Name]* | *[Their University]* | *[Their Field]* |
-
----
-
-## 📖 Documentation
+## 📚 Documentation
 
 - 📖 [Quick Start](QUICKSTART.md) - 5-minute getting started guide
-- 📖 [User Guide](docs/USAGE.md) - Detailed usage instructions and examples
-- 📊 [Paper Analysis Guide](docs/PAPER_ANALYSIS_GUIDE.md) - Deep analysis feature documentation
-- 🌐 [Puppeteer Configuration Guide](docs/PUPPETEER_GUIDE.md) - Browser search configuration
-- ✅ [Test Report](docs/TEST_REPORT.md) - Test coverage and quality assurance
-- 🚀 [Implementation Log](docs/TEST_IMPLEMENTATION_REPORT.md) - Development history
-
----
-
-## 💬 Join the Community
-
-Welcome to join our community and connect with other users!
-
-### 🤝 Discord Community
-
-Join our Discord server for real-time discussions with users worldwide:
-
-[![Discord](https://img.shields.io/badge/Discord-Join%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/4KhRcn6Sf6)
-
-**Join the discussion:** [https://discord.gg/4KhRcn6Sf6](https://discord.gg/4KhRcn6Sf6)
-
-### 🇨🇳 WeChat Group
-
-Scan the QR code to join our WeChat group:
-
-<div align="center">
-
-<img src="assets/wechat-qr.jpg" alt="WeChat QR Code" width="200"/>
-
-</div>
-
-**WeChat group for:**
-- 💡 Sharing experiences and best practices
-- 🐛 Reporting issues and suggestions
-- 📚 Getting project updates
-- 🤝 Connecting with like-minded people
-
----
-
-## 🧪 Development
-
-```bash
-# Run tests
-node tests/test-distill-mentor.js
-
-# Should see:
-# ✅ Passed: 5/5
-# 🎉 All tests passed!
-
-# View test report
-cat TEST_REPORT.md
-```
+- 🔧 [API Configuration](API_CONFIGURATION.md) - LLM API configuration
+- 📋 [API Quick Reference](API_QUICK_REFERENCE.md) - API parameter cheat sheet
+- 🔧 [API Diagnostic Tool](diagnose-api.sh) - Test API connection
 
 ---
 
@@ -360,33 +391,29 @@ cat TEST_REPORT.md
 
 **Please read the following important information carefully:**
 
-### 📌 Usage Restrictions
+### 📌 Usage Limitations
 
-1. **For Learning and Research Only** - Mentor skills generated by this tool are intended for academic exchange, learning, research, and personal reference purposes only
-2. **No Commercial Use** - Strictly prohibit using generated skills for any commercial purposes or profit-making activities
-3. **No Authority** - All generated content is based on AI analysis of public information and **does not represent the mentor's actual views or intentions**
+1. **For Learning and Research Only** - Generated mentor skills are for academic communication, learning, research, and personal reference only
+2. **No Commercial Use** - Strictly prohibit using generated skills for any commercial or profit-making activities
+3. **Not Authoritative** - All generated content is based on AI analysis of public information and **does not represent the mentor's actual views or intentions**
 
 ### 🔒 Data Sources
 
 - All information comes from **public channels** (papers, websites, interviews, social media, etc.)
-- No private or confidential information is involved
-- Information may be incomplete, outdated, or inaccurate
+- Does not involve any private or confidential information
+- May be incomplete, outdated, or inaccurate
 
 ### ⚠️ Accuracy Statement
 
 - AI-generated content is **for reference only** and does not constitute formal academic advice or professional guidance
 - Do not rely entirely on generated skills for important academic or career decisions
-- For critical questions, it's recommended to contact the mentor directly or consult authoritative sources
+- For critical issues, consult the mentor directly or authoritative sources
 
 ### 🤝 Intellectual Property
 
-- Mentors' names, research achievements, and academic views belong to them
-- This tool is only for information organization and knowledge dissemination, not infringing on any intellectual property rights
-- If there are any objections, please contact for deletion or modification
-
-### 📧 Contact
-
-For any questions or suggestions, please contact us via [GitHub Issues](https://github.com/ybq22/supervisor/issues).
+- Mentor names, research achievements, and academic views belong to themselves
+- This tool is for information organization and knowledge dissemination only, and does not infringe on any intellectual property rights
+- If you have any objections, please contact for removal or modification
 
 ---
 
@@ -395,15 +422,15 @@ For any questions or suggestions, please contact us via [GitHub Issues](https://
 We welcome all forms of contributions!
 
 ### 👨‍🎓 What Students Can Do
-1. **Test and Feedback** - Use the tool and provide user experience
-2. **Report Issues** - File issues when finding bugs or feature gaps
-3. **Share Cases** - Share mentor skills you successfully created
-4. **Improve Documentation** - Help improve user guides and examples
+1. **Test and Feedback** - Use the tool and share your experience
+2. **Report Issues** - Submit issues when finding bugs or feature gaps
+3. **Share Cases** - Share mentor skills you've successfully created
+4. **Improve Documentation** - Help improve usage guides and examples
 
-### 👨‍🏫 What Teachers Can Do
-1. **Provide Real Feedback** - Evaluate tool accuracy from an educator's perspective
+### 👨‍🏫 What Professors Can Do
+1. **Provide Authentic Feedback** - Evaluate tool accuracy from an educator's perspective
 2. **Share Best Practices** - How to better use digital mentors to assist teaching
-3. **Suggest Features** - Propose improvements based on teaching needs
+3. **Suggest New Features** - Propose improvements based on teaching needs
 4. **Contribute Data Sources** - Recommend more academic databases and resources
 
 ### 🔧 Technical Contributions
@@ -416,7 +443,7 @@ We welcome all forms of contributions!
 
 ## 📋 License
 
-MIT License - See [LICENSE](LICENSE) for details
+MIT License - See [LICENSE](LICENSE)
 
 ---
 
@@ -424,10 +451,10 @@ MIT License - See [LICENSE](LICENSE) for details
 
 **Made with ❤️ by Claude Code & Human Collaboration**
 
-### 🎓 Empowering Both Ways, Facilitating Academic Exchange
+### 🎓 Two-Way Empowerment for Academic Communication
 
-**👨‍🎓 Students:** Get digital twins of mentors you admire, ask questions anytime!
-**👨‍🏫 Teachers:** Share your research philosophy and reach more students!
+**👨‍🎓 Students:** Get a digital replica of your admired mentor, ready to help anytime!
+**👨‍🏫 Professors:** Share your research philosophy and reach more students!
 
 ---
 
@@ -435,10 +462,10 @@ MIT License - See [LICENSE](LICENSE) for details
 
 [![Star History Chart](https://api.star-history.com/svg?repos=ybq22/supervisor&type=Date)](https://star-history.com/#ybq22/supervisor&Date)
 
-**[Start Distilling Your Desired Mentor!](https://github.com/ybq22/supervisor)**
+**[Start Distilling Your Admired Mentor!](https://github.com/ybq22/supervisor)**
 
 or
 
-**[Create Your Own Digital Twin!](https://github.com/ybq22/supervisor)**
+**[Create Your Own Digital Replica!](https://github.com/ybq22/supervisor)**
 
 </div>

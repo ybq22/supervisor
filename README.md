@@ -14,6 +14,8 @@
 [![GitHub Issues](https://img.shields.io/github/issues/ybq22/supervisor)](https://github.com/ybq22/supervisor/issues)
 [![GitHub Contributors](https://img.shields.io/github/contributors/ybq22/supervisor)](https://github.com/ybq22/supervisor/graphs/contributors)
 
+[English](./README.EN.md) | 简体中文
+
 ---
 
 </div>
@@ -39,13 +41,13 @@
 
 ```bash
 # 👨‍🎓 作为学生：生成你向往的导师 skill
-/distill-mentor Geoffrey Hinton --affiliation "University of Toronto"
+node tools/skill-generator.mjs "Geoffrey Hinton" --affiliation "University of Toronto"
 
 # 👨‍🏫 作为教师：生成自己的 skill 分享给学生
-/distill-mentor "Your Name" --affiliation "Your University"
+node tools/skill-generator.mjs "Your Name" --affiliation "Your University"
 
 # 然后就可以随时对话了！
-/mentor-skill 你的问题或需求
+/GeoffreyHinton 你的问题或需求
 ```
 
 **✨ 学生：** 就像导师真的在身边一样，随时请教！
@@ -59,11 +61,13 @@
 
 | 功能 | 说明 |
 |------|------|
-| 🔍 **智能搜索** | **浏览器搜索**全面收集导师信息：论文、主页、演讲、访谈等 |
+| 🔍 **智能搜索** | **Google 搜索**全面收集导师信息：机构主页、Wikipedia、Google Scholar、个人主页 |
 | 🧠 **风格学习** | AI 分析导师的研究风格、表达习惯和学术观点 |
-| 🔬 **深度论文分析** 🆕 | 从论文中提取研究兴趣、方法论偏好、写作风格、可视化特点等 |
-| 🌐 **公开信息分析** 🆕 | 从新闻、访谈、社交媒体中分析性格、沟通风格、学术理念 |
-| 📊 **综合画像** 🆕 | 整合论文和公开信息，生成全面的导师数字画像 |
+| 🔬 **深度论文分析** | 从论文中提取研究主题、方法论偏好、写作风格、可视化特点等 |
+| 🌐 **公开信息分析** | 从新闻、访谈、社交媒体中分析性格、沟通风格、学术理念 |
+| 📊 **综合画像** | 整合论文和公开信息，生成全面的导师数字画像 |
+| 📸 **聊天截图分析** 🆕 | 从聊天记录截图学习导师的真实说话风格和语言习惯 |
+| 📤 **智能上传** 🆕 | 上传材料自动进行深度分析，无需额外操作 |
 | 💾 **随时查阅** | 生成结构化 JSON 档案，随时可更新 |
 | 🤖 **即时对话** | 自动创建可直接对话的 Claude Code skill |
 | 🌍 **无障碍交流** | 支持中英文导师，无障碍交流 |
@@ -79,57 +83,64 @@
 | 🌐 **扩大影响** | 让更多学生受益于你的研究经验 |
 | 🔄 **持续更新** | 随时更新你的最新研究成果 |
 
-### ⚙️ 技术特性
+---
 
-| 特性 | 说明 |
-|------|------|
-| 📊 **质量评估** | 自动评估数据质量，给出改进建议 |
-| ⚡ **快速模式** | 可选仅用 ArXiv + API，速度更快 |
+## 🔥 新功能亮点
 
-### 🔬 深度分析功能
+### 📸 聊天截图分析
 
-**深度论文分析**：
-- 🎯 研究兴趣图谱 - 核心主题、演进趋势、新兴方向
-- 🔬 研究问题偏好 - 理论vs实践、基础vs应用、开创vs改进
-- 📊 方法论特点 - 实验设计、数据集选择、评估指标
-- 📈 可视化风格 - 图表类型、呈现方式、结果展示
-- ✍️ 写作风格 - 标题模式、摘要结构、正文特征
-- 🧠 研究思路 - 创新来源、问题解决路径
-- ⚖️ 学术价值观 - 简洁性、实用性、严谨性、开放性
+**NEW**: 上传聊天截图，学习导师的真实说话风格！
 
-**公开信息分析**：
-- 😊 性格特征 - 开放性、尽责性、外向性、宜人性
-- 💼 工作风格 - 节奏、优先级、决策方式
-- 🗣️ 沟通风格 - 演讲、非学术写作、表达习惯
-- 🎓 学术理念 - 研究哲学、教学理念
-- 🤝 社交人际 - 合作风格、师生关系、社区参与
-- 💡 价值观 - 职业价值、社会伦理观点
-- 🌟 个人兴趣 - 学术外兴趣、工作生活平衡
+```bash
+/upload "导师名字" chat-screenshot.png
+```
+
+**功能特点**:
+- ✅ 自动检测聊天截图（WeChat、WhatsApp、Telegram等）
+- ✅ 智能识别导师位置（通常在左侧）
+- ✅ 提取导师所有消息
+- ✅ 分析说话风格：语气、直接程度、礼貌程度、Emoji使用
+- ✅ 提取常用短语和表达习惯
+- ✅ 学习个性化语言特征
+
+### 📤 自动深度分析
+
+**NEW**: 上传材料自动进行深度分析，无需手动调用
+
+```bash
+# 支持的文件类型
+/upload "导师名字" bio.pdf          # 论文分析
+/upload "导师名字" interview.md      # 访谈分析
+/upload "导师名字" chat.png          # 聊天截图分析
+
+# 重新生成技能即可整合所有分析
+node tools/skill-generator.mjs "导师名字" --affiliation "机构"
+```
 
 ---
 
-## 📤 Upload Materials
+## 📤 上传材料
 
-Enhance your mentor skills by uploading additional materials through six channels:
+通过多种渠道上传材料以增强导师技能：
 
-**Phase 1-3 (Current):**
-- **Text** (.txt, .text) - Transcripts, notes, correspondence
-- **Markdown** (.md) - Notes, documentation, structured text
-- **PDF** (.pdf) - Research papers, lecture notes, documentation
-- **Email** (.eml, .mbox) - Correspondence, email threads
-- **Images** (.png, .jpg, .jpeg, .gif, .webp) - Screenshots, diagrams (metadata only, Vision API pending)
-- **Feishu** (.json) - Feishu document and message exports
+**支持的文件类型**:
+- **📸 图片** (.png, .jpg, .jpeg, .gif, .webp) - 聊天截图、照片（分析说话风格）
+- **📄 PDF** (.pdf) - 研究论文、传记、文档
+- **📝 文本** (.txt, .text) - 访谈记录、笔记、通信
+- **📑 Markdown** (.md) - 笔记、文档、结构化文本
+- **📧 邮件** (.eml, .mbox) - 通信记录、邮件线程
+- **📊 数据** (.json) - Feishu 导出数据、结构化数据
 
-**Quick Example:**
+**快速示例**:
 ```bash
-cp research_notes.md uploads/markdown/
-cp lecture_slides.pdf uploads/pdfs/
-cp screenshot.png uploads/images/
-cp meeting_notes.json uploads/feishu/
-node tools/skill-generator.mjs "Geoffrey Hinton" --affiliation "University of Toronto"
-```
+# 上传多个文件（自动分析）
+/upload "Fei-Fei Li" bio.pdf
+/upload "Fei-Fei Li" interview.md
+/upload "Fei-Fei Li" wechat-chat.png
 
-**Full documentation:** See [UPLOAD_GUIDE.md](docs/UPLOAD_GUIDE.md)
+# 重新生成技能
+node tools/skill-generator.mjs "Fei-Fei Li" --affiliation "Stanford University"
+```
 
 ---
 
@@ -151,29 +162,90 @@ node tools/skill-generator.mjs "Geoffrey Hinton" --affiliation "University of To
 git clone https://github.com/ybq22/supervisor.git
 cd supervisor
 
-# 确保 Node.js 版本 >= 18
-node --version  # 应显示 v18.0.0 或更高
+# 安装依赖
+npm install
+
+# 配置 API（可选，用于深度分析）
+cp .env.example .env
+# 编辑 .env 文件，填入你的 API Key
 ```
 
-### 2️⃣ 生成你的第一个数字导师
+### 2️⃣ 配置 API（可选）
+
+如需使用深度分析和聊天截图功能，需要配置 LLM API：
+
+```bash
+# 编辑 .env 文件
+LLM_API=openai                                    # 或 anthropic
+OPENAI_API_KEY=sk-xxx                            # 你的 API Key
+OPENAI_BASE_URL=https://api.openai.com/v1        # API 地址
+OPENAI_MODEL=gpt-4o                              # 模型名称
+```
+
+详细配置请参考：[API 配置指南](API_CONFIGURATION.md)
+
+### 3️⃣ 生成你的第一个数字导师
 
 ```bash
 # 👨‍🎓 学生：生成你向往的导师 skill
-/distill-mentor "Geoffrey Hinton" --affiliation "University of Toronto"
+node tools/skill-generator.mjs "Geoffrey Hinton" --affiliation "University of Toronto"
 
 # 👨‍🏫 教师：生成自己的 skill
-/distill-mentor "Your Name" --affiliation "Your University"
+node tools/skill-generator.mjs "Your Name" --affiliation "Your University"
 ```
 
-### 3️⃣ 开始对话！
+### 4️⃣ 开始对话！
 
 ```bash
 # 👨‍🎓 学生：随时请教问题
-/geoffrey-hinton 我这篇论文的创新点够不够突出？
+/GeoffreyHinton 我这篇论文的创新点够不够突出？
 
 # 👨‍🏫 教师：让学生快速了解你的研究
-/your-name 你的研究哲学是什么？
+/YourName 你的研究哲学是什么？
 ```
+
+---
+
+## 📋 更新日志
+
+### 2026-04-07 - v1.2.0
+
+**新功能** ✨:
+- 📸 **聊天截图分析**: 自动识别聊天记录并学习导师说话风格
+- 📤 **自动深度分析**: 上传材料自动进行深度分析，无需额外操作
+- 🔍 **改进搜索方式**: 默认使用 Google Search 替代 ArXiv，避免同名作者问题
+
+**改进** 🚀:
+- ✅ 修复 workspace 路径处理问题
+- ✅ 优化文件上传和解析流程
+- ✅ 增强分析结果存储结构
+
+**文档** 📚:
+- 添加聊天截图分析文档
+- 更新 API 配置指南
+- 新增更新日志板块
+
+### 2026-04-06 - v1.1.0
+
+**新功能** ✨:
+- 🧠 **深度论文分析**: 提取研究主题、方法论、写作风格
+- 🌐 **公开信息分析**: 分析性格、沟通风格、学术理念
+- 📤 **多渠道上传**: 支持 PDF、TXT、MD、图片、邮件等多种格式
+- 📊 **质量评估**: 自动评估数据质量并给出改进建议
+
+**改进** 🚀:
+- ✅ 支持 OpenAI 和 Anthropic 双 API
+- ✅ 添加 .env 配置文件支持
+- ✅ 优化搜索策略，避免 ArXiv 同名作者问题
+
+### 2026-04-05 - v1.0.0
+
+**初始发布** 🎉:
+- ✨ 导师技能生成核心功能
+- 🔍 ArXiv 论文搜索
+- 🌐 Google 浏览器搜索
+- 🤖 Claude Code skill 生成
+- 📚 基础文档和示例
 
 ---
 
@@ -184,7 +256,7 @@ node --version  # 应显示 v18.0.0 或更高
 #### 📝 论文审阅
 
 ```bash
-/geoffrey-hinton 我这篇关于深度学习论文的创新点够不够突出？
+/GeoffreyHinton 我这篇关于深度学习论文的创新点够不够突出？
 ```
 
 **数字导师会：**
@@ -196,7 +268,7 @@ node --version  # 应显示 v18.0.0 或更高
 ### 🔬 研究方向咨询
 
 ```bash
-/geoffrey-hinton 神经网络的架构设计有哪些前沿方向？
+/GeoffreyHinton 神经网络的架构设计有哪些前沿方向？
 ```
 
 **数字导师会：**
@@ -212,7 +284,7 @@ node --version  # 应显示 v18.0.0 或更高
 #### 💡 分享研究理念
 
 ```bash
-/my-skill 我想让学生快速了解我的研究哲学和核心观点
+/YourName 我想让学生快速了解我的研究哲学和核心观点
 ```
 
 **数字导师会：**
@@ -224,7 +296,7 @@ node --version  # 应显示 v18.0.0 或更高
 #### 📚 提高沟通效率
 
 ```bash
-/my-skill 帮我回答关于我研究方法的常见问题
+/YourName 帮我回答关于我研究方法的常见问题
 ```
 
 **数字导师会：**
@@ -238,23 +310,31 @@ node --version  # 应显示 v18.0.0 或更高
 ## 📁 项目结构
 
 ```
-distill-mentor/
-├── SKILL.md                   # AgentSkills 入口文件
-├── prompts/                   # Prompt 模板
-│   ├── intake.md             # 信息收集流程
-│   ├── analyzer.md           # 档案分析提示
-│   ├── style-analyzer.md     # 风格分析提示
-│   └── builder.md            # Skill 生成提示
-├── tools/                     # 实现工具
-│   ├── arxiv-search.mjs      # ArXiv API 搜索
-│   ├── puppeteer-search.mjs  # 浏览器搜索
+supervisor/
+├── tools/                     # 核心工具
+│   ├── skill-generator.mjs   # 主生成器
+│   ├── arxiv-search.mjs      # ArXiv 搜索（可选）
+│   ├── puppeteer-search.mjs  # Google 浏览器搜索
 │   ├── paper-analysis.mjs    # 深度论文分析
-│   └── skill-generator.mjs   # 主生成器
-├── mentors/                   # 生成的档案（gitignored）
+│   ├── content-analyzer.mjs  # 内容分析（LLM API）
+│   ├── chat-screenshot-analyzer.mjs  # 聊天截图分析
+│   ├── workspace-manager.mjs # 工作区管理
+│   ├── parsers/              # 文件解析器
+│   │   ├── pdf.mjs
+│   │   ├── text.mjs
+│   │   └── markdown.mjs
+│   └── upload-scanner.mjs    # 上传文件扫描
 ├── docs/                      # 文档
-├── examples/                  # 使用示例
-└── tests/                     # 测试文件
+│   ├── QUICKSTART.md         # 快速开始
+│   ├── API_CONFIGURATION.md  # API 配置指南
+│   └── API_QUICK_REFERENCE.md # API 快速参考
+├── .env.example              # 配置文件示例
+├── package.json              # 依赖配置
+├── diagnose-api.sh           # API 诊断工具
+└── README.md                 # 本文件
 ```
+
+---
 
 ## 🏗️ 工作原理
 
@@ -265,123 +345,45 @@ distill-mentor/
 │                                                                 │
 │  1️⃣ 输入导师姓名 + 所属机构                                       │
 │           ↓                                                     │
-│  2️⃣ 🔍 多源搜索                                                 │
-│     ├─ ArXiv 论文搜索                                           │
-│     ├─ 浏览器搜索 x4                                             │
-│     │  ├─ 个人主页                                              │
-│     │  ├─ 论文/出版物                                           │
-│     │  ├─ 演讲/访谈                                             │
-│     │  └─ Wikipedia                                            │
+│  2️⃣ 🔍 多源搜索（Google Search 优先）                           │
+│     ├─ 机构主页 + 姓名                                           │
+│     ├─ Wikipedia                                                │
+│     ├─ Google Scholar                                           │
+│     └─ 个人主页                                                  │
 │           ↓                                                     │
-│  3️⃣ 🧠 AI 深度分析                                              │
-│     ├─ 🔬 论文分析（研究兴趣、方法论、写作风格）                     │
+│  3️⃣ 📤 上传材料（可选）                                          │
+│     ├─ 📸 聊天截图 → 分析说话风格                                 │
+│     ├─ 📄 PDF 论文 → 分析研究风格                                │
+│     ├─ 📝 访谈文本 → 分析沟通风格                                │
+│     └─ 自动深度分析 🆕                                          │
+│           ↓                                                     │
+│  4️⃣ 🧠 AI 深度分析                                              │
+│     ├─ 🔬 论文分析（研究主题、方法论、写作风格）                     │
 │     ├─ 🌐 公开信息分析（性格、沟通风格、学术理念）                    │
+│     ├─ 📸 聊天风格分析（语气、用词、表达习惯）🆕                    │
 │     └─ 📊 综合画像生成                                           │
 │           ↓                                                     │
-│  4️⃣ 💾 持久化存储                                               │
-│     └─ 生成结构化 JSON 档案                                      │
+│  5️⃣ 💾 持久化存储                                               │
+│     └─ 生成结构化 JSON 档案 + 分析结果                            │
 │           ↓                                                     │
-│  5️⃣ 🤖 自动创建 Skill                                           │
+│  6️⃣ 🤖 自动创建 Skill                                           │
 │     └─ 生成可直接对话的 Claude Code skill                        │
 │           ↓                                                     │
-│  6️⃣ 💬 开始对话！                                                │
+│  7️⃣ 💬 开始对话！                                                │
 │     ├─ 学生：随时提问、论文审阅、研究方向咨询                        │
 │     └─ 教师：分享研究理念、扩大影响力、提高沟通效率                   │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-
-
-### 📂 输出文件
-
-```
-~/.claude/
-├── mentors/
-│   └── {导师姓名}.json          # 结构化档案
-└── skills/
-    └── {导师姓名}/
-        └── SKILL.md             # Claude Code skill
-```
-
 ---
 
-## 📚 示例导师
-
-### 👨‍🎓 学习榜样
-
-| 导师 | 机构 | 研究领域 |
-|------|------|----------|
-| Geoffrey Hinton | University of Toronto | Deep Learning, Neural Networks, Cognitive Science |
-| *[你向往的导师]* | *[他们的机构]* | *[他们的领域]* |
-
-### 👨‍🏫 教师案例
-
-创建你自己的数字分身，让学生随时了解你的研究理念：
-
-| 导师 | 机构 | 研究领域 |
-|------|------|----------|
-| *[Your Name]* | *[Your University]* | *[Your Research Field]* |
-| *[Collaborator Name]* | *[Their University]* | *[Their Field]* |
-
----
-
-## 📖 文档
+## 📚 文档
 
 - 📖 [快速开始](QUICKSTART.md) - 5分钟上手指南
-- 📤 [上传指南](docs/UPLOAD_GUIDE.md) - 多渠道材料上传说明
-- 🔧 [故障排除](docs/TROUBLESHOOTING.md) - 常见问题和解决方案
-- 📖 [使用指南](docs/USAGE.md) - 详细使用说明和示例
-- 📊 [论文深度分析指南](docs/PAPER_ANALYSIS_GUIDE.md) - 深度分析功能说明
-- 🌐 [Puppeteer 配置指南](docs/PUPPETEER_GUIDE.md) - 浏览器搜索配置
-- ✅ [测试报告](docs/TEST_REPORT.md) - 测试覆盖和质量保证
-- 🚀 [实施记录](docs/TEST_IMPLEMENTATION_REPORT.md) - 开发历程
-
----
-
-## 💬 加入社区
-
-欢迎加入我们的社区，与其他用户交流使用经验！
-
-### 🤝 Discord 社区
-
-加入我们的 Discord 服务器，与全球用户实时交流：
-
-[![Discord](https://img.shields.io/badge/Discord-Join%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/4KhRcn6Sf6)
-
-**加入讨论：** [https://discord.gg/4KhRcn6Sf6](https://discord.gg/4KhRcn6Sf6)
-
-### 🇨🇳 微信群
-
-扫描二维码加入微信群：
-
-<div align="center">
-
-<img src="assets/wechat-qr.jpg" alt="微信二维码" width="200"/>
-
-</div>
-
-**微信群用途：**
-- 💡 分享使用心得和最佳实践
-- 🐛 反馈问题和建议
-- 📚 获取项目更新通知
-- 🤝 结识志同道合的朋友
-
----
-
-## 🧪 开发
-
-```bash
-# 运行测试
-node tests/test-distill-mentor.js
-
-# 应该看到：
-# ✅ Passed: 5/5
-# 🎉 All tests passed!
-
-# 查看测试报告
-cat TEST_REPORT.md
-```
+- 🔧 [API 配置指南](API_CONFIGURATION.md) - LLM API 配置说明
+- 📋 [API 快速参考](API_QUICK_REFERENCE.md) - API 参数速查
+- 🔧 [API 诊断工具](diagnose-api.sh) - 测试 API 连接
 
 ---
 
@@ -412,10 +414,6 @@ cat TEST_REPORT.md
 - 导师的姓名、研究成果和学术观点归其本人所有
 - 本工具仅用于信息整理和知识传播，不侵犯任何知识产权
 - 如有异议，请联系删除或修改
-
-### 📧 联系方式
-
-如有任何问题或建议，请通过 [GitHub Issues](https://github.com/ybq22/supervisor/issues) 联系我们。
 
 ---
 
